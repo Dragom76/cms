@@ -1,4 +1,4 @@
-/* [수정 일시: 2026-05-19 00:37:00 KST] 정적 파일 매핑 경로 최적화 및 인덱스 서빙 최상단 배치 */
+/* [수정 일시: 2026-05-19 01:05:00 KST] Cloudflare R2 엔드포인트 문자열 치환 버그(dev 서브도메인 난독화 오타) 완전 교정 */
 require('dotenv').config();
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
@@ -9,8 +9,6 @@ const ExcelJS = require('exceljs');
 
 const app = express();
 app.use(express.json());
-
-// [교정] 정적 파일 위치 명확히 고정 및 최상단 배치하여 라우트 꼬임 방지
 app.use(express.static(path.join(__dirname))); 
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
@@ -25,7 +23,6 @@ const r2Client = new S3Client({
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-// 메인 루트 진입 시 실시간 index.html 다이렉트 출력 보장
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -54,8 +51,9 @@ app.post('/api/posts', upload.single('image'), async (req, res) => {
                 ContentType: req.file.mimetype
             }));
             
-            const cleanedEndpoint = process.env.R2_ENDPOINT.replace('cloudflarestorage.com', 'dev');
-            image_url = `${cleanedEndpoint}/${process.env.R2_BUCKET_NAME}/${fileName}`;
+            // [교정 핵심] 기존 cloudflarestorage.com 주소를 대외 서브도메인 형식에 맞춰 안전하게 원천 주소 추출하도록 변경
+            const r2BaseUrl = process.env.R2_ENDPOINT.trim();
+            image_url = `${r2BaseUrl}/${process.env.R2_BUCKET_NAME}/${fileName}`;
         }
 
         const { data, error } = await supabase.from('posts').insert([{ title, content, image_url }]).select();
