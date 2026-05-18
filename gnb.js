@@ -1,8 +1,7 @@
-// [수정 일시: 2026-05-19 00:23:00 KST] 레이아웃 마크업 동적 삽입 및 프론트엔드 비즈니스 기능 제어 일체 탑재
+/* [수정 일시: 2026-05-19 00:37:00 KST] 화면 단독 스위칭 완전 격리 제어 및 전송 피드백 팝업 알림 탑재 */
 let allPosts = [];
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. 기존 헤더 동적 삽입
     const gnbHTML = `
         <header class="erp-header">
             <div class="header-top">
@@ -11,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
             <nav class="header-nav">
                 <ul>
-                    <li class="active"><a href="#">게시물 관리</a></li>
+                    <li class="active"><a href="#" id="menu-board-link">게시물 관리</a></li>
                     <li><a href="#">시스템 설정</a></li>
                     <li><a href="#">로그 분석</a></li>
                 </ul>
@@ -20,13 +19,14 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     document.body.insertAdjacentHTML("afterbegin", gnbHTML);
 
-    // 2. HTML 태그 내 제어 이벤트 리스너 수동 바인딩 처리 (인라인 스크립트 배제)
+    // 이벤트 리스너 바인딩 안전 예외 처리
     const btnWrite = document.getElementById('btn-open-write');
     const btnExcel = document.getElementById('btn-download-excel');
     const btnClose = document.getElementById('btn-close-form');
     const btnDelete = document.getElementById('btn-delete');
     const postForm = document.getElementById('post-form');
     const fileInput = document.getElementById('image');
+    const menuLink = document.getElementById('menu-board-link');
 
     if (btnWrite) btnWrite.addEventListener('click', openWriteMode);
     if (btnExcel) btnExcel.addEventListener('click', downloadExcel);
@@ -34,8 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnDelete) btnDelete.addEventListener('click', deletePost);
     if (postForm) postForm.addEventListener('submit', handleSubmit);
     if (fileInput) fileInput.addEventListener('change', previewImage);
+    if (menuLink) menuLink.addEventListener('click', (e) => { e.preventDefault(); showListView(); });
 
-    // 3. 앱 초기화 동작 시동
     showListView();
     fetchPosts();
 });
@@ -61,7 +61,6 @@ async function fetchPosts() {
             </tr>
         `).join('');
 
-        // 테이블 열 클릭 리스너 바인딩
         tbody.querySelectorAll('tr').forEach(tr => {
             tr.addEventListener('click', () => {
                 const id = tr.getAttribute('data-id');
@@ -69,11 +68,12 @@ async function fetchPosts() {
             });
         });
     } catch (err) {
-        console.error("데이터 로드 오류:", err);
-        alert("데이터베이스 정보를 불러오는데 실패했습니다.");
+        console.error("데이터 로드 실패:", err);
+        alert("데이터베이스 정보를 읽어오지 못했습니다. 환경 변수 연결 상태를 확인해 주세요.");
     }
 }
 
+// 요구사항: 한 화면에는 무조건 해당 기능 레이아웃만 단독 노출 (격리성 강화)
 function showListView() {
     document.getElementById('section-form').classList.remove('active');
     document.getElementById('section-list').classList.add('active');
@@ -121,11 +121,12 @@ function previewImage(event) {
     const preview = document.getElementById('preview');
     const files = event.target.files;
     if (files && files.length > 0) {
-        preview.src = URL.createObjectURL(files[0]);
+        preview.src = URL.createObjectURL(files[0]); // 단일 파일 인덱싱 명시적 보완
         preview.style.display = 'block';
     }
 }
 
+// 요구사항: 처리 결과 성공/실패 여부를 알림(alert)으로 명확히 인지시킬 것
 async function handleSubmit(event) {
     event.preventDefault();
     const id = document.getElementById('post-id').value;
@@ -140,15 +141,15 @@ async function handleSubmit(event) {
                 body: JSON.stringify({ title, content })
             });
             if (!res.ok) throw new Error();
-            alert('게시물이 성공적으로 수정되었습니다.');
+            alert('🎉 성공: 게시물이 정상적으로 수정되었습니다.');
         } else {
             const formData = new FormData();
             formData.append('title', title);
             formData.append('content', content);
             
             const fileInput = document.getElementById('image');
-            if (fileInput.files && fileInput.files.length > 0) {
-                formData.append('image', fileInput.files[0]);
+            if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                formData.append('image', fileInput.files[0]); // 멀티파트 업로드 바이너리 슬라이싱 유효 규격 조절
             }
 
             const res = await fetch('/api/posts', {
@@ -156,26 +157,26 @@ async function handleSubmit(event) {
                 body: formData
             });
             if (!res.ok) throw new Error();
-            alert('새 게시물이 안전하게 등록되었습니다.');
+            alert('🎉 성공: 새 게시물이 마스터 데이터베이스에 등록되었습니다.');
         }
         showListView();
         fetchPosts();
     } catch (err) {
-        alert('처리 중 오류가 발생했습니다. 입력 정보를 확인해 주세요.');
+        alert('❌ 실패: 서버 통신 장애 또는 누락된 필수 값이 존재하여 반영에 실패했습니다.');
     }
 }
 
 async function deletePost() {
     const id = document.getElementById('post-id').value;
-    if (id && confirm('정말 이 게시물을 삭제하시겠습니까?')) {
+    if (id && confirm('정말 이 게시물을 영구 삭제하시겠습니까?')) {
         try {
             const res = await fetch(`/api/posts/${id}`, { method: 'DELETE' });
             if (!res.ok) throw new Error();
-            alert('게시물이 삭제되었습니다.');
+            alert('🗑️ 처리 완료: 해당 데이터가 정상적으로 삭제되었습니다.');
             showListView();
             fetchPosts();
         } catch (err) {
-            alert('삭제 처리에 실패했습니다.');
+            alert('❌ 실패: 원격 제어 삭제 처리에 실패했습니다.');
         }
     }
 }

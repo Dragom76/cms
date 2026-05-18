@@ -1,4 +1,4 @@
-<!-- [수정 일시: 2026-05-19 00:34:00 KST] gnb.js 바인딩 ID 식별자 동기화 및 렌더링 정상화 완료 -->
+<!-- [수정 일시: 2026-05-19 00:37:00 KST] 단독 독립 격리형 모듈 화면 컴포넌트 마크업 설계 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -12,7 +12,7 @@
 <body>
 
     <div class="erp-container">
-        <!-- 1. 리스트 화면 섹션 -->
+        <!-- 1. 리스트 단독 화면 섹션 -->
         <div id="section-list" class="page-section">
             <div class="erp-card">
                 <div class="card-title">
@@ -31,13 +31,13 @@
                         </tr>
                     </thead>
                     <tbody id="post-list">
-                        <!-- gnb.js에 의해 데이터가 동적으로 삽입되는 영역 -->
+                        <!-- gnb.js 바인딩 주입 -->
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- 2. 단독 작성 및 편집 폼 섹션 -->
+        <!-- 2. 작성/읽기/수정 격리 독립 화면 섹션 -->
         <div id="section-form" class="page-section">
             <div class="erp-card">
                 <div class="card-title">

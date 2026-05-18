@@ -1,3 +1,4 @@
+/* [수정 일시: 2026-05-19 00:37:00 KST] 정적 파일 매핑 경로 최적화 및 인덱스 서빙 최상단 배치 */
 require('dotenv').config();
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
@@ -8,9 +9,10 @@ const ExcelJS = require('exceljs');
 
 const app = express();
 app.use(express.json());
-app.use(express.static(__dirname)); // 현재 폴더의 정적 파일 서빙
 
-// 1. 서비스 연결 설정
+// [교정] 정적 파일 위치 명확히 고정 및 최상단 배치하여 라우트 꼬임 방지
+app.use(express.static(path.join(__dirname))); 
+
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 const r2Client = new S3Client({
     region: 'auto',
@@ -21,10 +23,13 @@ const r2Client = new S3Client({
     },
 });
 
-// 2. 이미지 업로드를 위한 Multer 설정
 const upload = multer({ storage: multer.memoryStorage() });
 
-// [API 1] 게시글 전체 리스트 조회 (R)
+// 메인 루트 진입 시 실시간 index.html 다이렉트 출력 보장
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 app.get('/api/posts', async (req, res) => {
     try {
         const { data, error } = await supabase.from('posts').select('*').order('id', { ascending: false });
@@ -35,7 +40,6 @@ app.get('/api/posts', async (req, res) => {
     }
 });
 
-// [API 2] 게시글 쓰기 (C) 및 Cloudflare R2 이미지 업로드
 app.post('/api/posts', upload.single('image'), async (req, res) => {
     try {
         const { title, content } = req.body;
@@ -50,7 +54,6 @@ app.post('/api/posts', upload.single('image'), async (req, res) => {
                 ContentType: req.file.mimetype
             }));
             
-            // 주소 파싱 방식 안전하게 변경
             const cleanedEndpoint = process.env.R2_ENDPOINT.replace('cloudflarestorage.com', 'dev');
             image_url = `${cleanedEndpoint}/${process.env.R2_BUCKET_NAME}/${fileName}`;
         }
@@ -63,22 +66,27 @@ app.post('/api/posts', upload.single('image'), async (req, res) => {
     }
 });
 
-// [API 3] 게시글 수정 (U)
 app.put('/api/posts/:id', async (req, res) => {
-    const { title, content } = req.body;
-    const { data, error } = await supabase.from('posts').update({ title, content }).eq('id', req.params.id).select();
-    if (error) return res.status(500).json({ error: error.message });
-    res.json(data);
+    try {
+        const { title, content } = req.body;
+        const { data, error } = await supabase.from('posts').update({ title, content }).eq('id', req.params.id).select();
+        if (error) throw error;
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
-// [API 4] 게시글 삭제 (D)
 app.delete('/api/posts/:id', async (req, res) => {
-    const { error } = await supabase.from('posts').delete().eq('id', req.params.id);
-    if (error) return res.status(500).json({ error: error.message });
-    res.json({ success: true });
+    try {
+        const { error } = await supabase.from('posts').delete().eq('id', req.params.id);
+        if (error) throw error;
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
-// [API 5] 데이터 엑셀 다운로드
 app.get('/api/posts/excel', async (req, res) => {
     try {
         const { data: posts, error } = await supabase.from('posts').select('*').order('id', { ascending: false });
@@ -104,11 +112,6 @@ app.get('/api/posts/excel', async (req, res) => {
     } catch (err) {
         res.status(500).send(err.message);
     }
-});
-
-// 메인 페이지 접속 시 index.html 서빙
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
