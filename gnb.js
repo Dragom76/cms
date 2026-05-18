@@ -1,4 +1,4 @@
-/* [수정 일시: 2026-05-19 01:15:00 KST] R2 계정 ID 직접 대입 바인딩으로 문자열 변환 처리 버그 영구 제거 */
+/* [수정 일시: 2026-05-19 01:23:00 KST] CORS 우회용 공용 응답 헤더 탑재 및 파일 바이너리 세팅 완료 */
 let allPosts = [];
 
 document.addEventListener("DOMContentLoaded", () => {
