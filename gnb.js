@@ -1,7 +1,9 @@
-/* [수정 일시: 2026-05-19 00:41:00 KST] FormData 파일 바이너리 객체 인덱싱 버그 교정 및 바인딩 복구 */
+/* [수정 일시: 2026-05-19 00:44:00 KST] 원인 분석을 위한 실시간 데이터베이스 통신 로그 추적 코드 전면 탑재 */
 let allPosts = [];
 
 document.addEventListener("DOMContentLoaded", () => {
+    console.log("🔍 [로그] ERP 시스템 프론트엔드가 구동되었습니다.");
+    
     const gnbHTML = `
         <header class="erp-header">
             <div class="header-top">
@@ -40,14 +42,28 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function fetchPosts() {
+    console.log("📡 [로그] 백엔드 서버(/api/posts)에 데이터를 요청합니다...");
     try {
         const res = await fetch('/api/posts');
-        if (!res.ok) throw new Error();
-        allPosts = await res.json();
-        const tbody = document.getElementById('post-list');
         
-        if (!tbody) return;
+        console.log("📊 [로그] 서버 응답 상태 코드:", res.status);
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error("❌ [로그] 서버가 에러를 반환했습니다. 내용:", errorText);
+            throw new Error();
+        }
+
+        allPosts = await res.json();
+        console.log("📦 [로그] 데이터베이스로부터 받아온 실시간 데이터 목록:", allPosts);
+        
+        const tbody = document.getElementById('post-list');
+        if (!tbody) {
+            console.error("❌ [로그] HTML 내부에 'post-list' ID를 가진 tbody 태그를 찾을 수 없습니다.");
+            return;
+        }
+
         if (!allPosts || allPosts.length === 0) {
+            console.warn("⚠️ [로그] 통신은 성공했으나 데이터베이스에 저장된 게시글이 0개(비어있음)입니다.");
             tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#64748b;">데이터가 없습니다.</td></tr>';
             return;
         }
@@ -66,9 +82,11 @@ async function fetchPosts() {
                 if (id) loadPost(parseInt(id));
             });
         });
+        console.log("✅ [로그] 화면 테이블에 데이터 맵핑이 정상 완료되었습니다.");
+
     } catch (err) {
-        console.error("데이터 로드 실패:", err);
-        alert("데이터베이스 정보를 읽어오지 못했습니다. 환경 변수 연결 상태를 확인해 주세요.");
+        console.error("💥 [로그] 최상위 데이터 통신 예외 에러 발생:", err);
+        alert("데이터베이스 정보를 읽어오지 못했습니다. F12 콘솔 로그를 확인해 주세요.");
     }
 }
 
@@ -145,7 +163,6 @@ async function handleSubmit(event) {
             formData.append('content', content);
             
             const fileInput = document.getElementById('image');
-            // [교정 핵심] files 배열 통째가 아닌 첫 번째 인덱스 단일 파일 바이너리로 명확히 지정
             if (fileInput && fileInput.files && fileInput.files.length > 0) {
                 formData.append('image', fileInput.files[0]); 
             }
@@ -160,7 +177,7 @@ async function handleSubmit(event) {
         showListView();
         fetchPosts();
     } catch (err) {
-        alert('❌ 실패: 서버 통신 장애 또는 누락된 필수 값이 존재하여 반영에 실패했습니다.');
+        alert('❌ 실패: 서버 반영에 실패했습니다.');
     }
 }
 
