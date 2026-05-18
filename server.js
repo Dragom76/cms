@@ -1,4 +1,4 @@
-/* [수정 일시: 2026-05-19 02:10:00 KST] 본인의 실제 Cloudflare R2 계정 고유 해시 ID(bb4a9796...) 규격으로 주소 일치화 완료 */
+/* [수정 일시: 2026-05-19 02:18:00 KST] 한글 및 특수문자 깨짐 오류 방지를 위해 업로드 파일명을 영문+숫자로 자동 강제 변환 */
 require('dotenv').config();
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
@@ -50,7 +50,11 @@ app.post('/api/posts', upload.single('image'), async (req, res) => {
         let image_url = '';
 
         if (req.file) {
-            const fileName = `${Date.now()}_${req.file.originalname}`;
+            // [교정 핵심] 한글/특수문자 파일명을 완전히 버리고 날짜_랜덤문자.확장자 형태로 세탁
+            const fileExtension = path.extname(req.file.originalname).toLowerCase();
+            const uniqueString = Math.random().toString(36).substring(2, 8);
+            const fileName = `${Date.now()}_${uniqueString}${fileExtension}`;
+
             await r2Client.send(new PutObjectCommand({
                 Bucket: process.env.R2_BUCKET_NAME,
                 Key: fileName,
@@ -58,7 +62,6 @@ app.post('/api/posts', upload.single('image'), async (req, res) => {
                 ContentType: req.file.mimetype 
             }));
             
-            // [교정 핵심] 본인의 진짜 Cloudflare 실서버 계정 고유 ID 해시값으로 완벽히 동기화 타겟팅 변경
             const realAccountHash = "bb4a97963e754ec4a974aad4402fb137";
             image_url = `https://pub-${realAccountHash}.r2.dev/${fileName}`;
         }

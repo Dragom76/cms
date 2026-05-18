@@ -1,4 +1,4 @@
-/* [수정 일시: 2026-05-19 02:10:00 KST] 본인의 실제 Cloudflare R2 계정 고유 해시 ID(bb4a9796...) 규격으로 주소 일치화 완료 */
+/* [수정 일시: 2026-05-19 02:18:00 KST] 한글 및 특수문자 깨짐 오류 방지를 위해 업로드 파일명을 영문+숫자로 자동 강제 변환 */
 let allPosts = [];
 
 document.addEventListener("DOMContentLoaded", () => {
