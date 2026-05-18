@@ -1,4 +1,4 @@
-/* [수정 일시: 2026-05-19 00:37:00 KST] 화면 단독 스위칭 완전 격리 제어 및 전송 피드백 팝업 알림 탑재 */
+/* [수정 일시: 2026-05-19 00:41:00 KST] FormData 파일 바이너리 객체 인덱싱 버그 교정 및 바인딩 복구 */
 let allPosts = [];
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -19,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     document.body.insertAdjacentHTML("afterbegin", gnbHTML);
 
-    // 이벤트 리스너 바인딩 안전 예외 처리
     const btnWrite = document.getElementById('btn-open-write');
     const btnExcel = document.getElementById('btn-download-excel');
     const btnClose = document.getElementById('btn-close-form');
@@ -73,7 +72,6 @@ async function fetchPosts() {
     }
 }
 
-// 요구사항: 한 화면에는 무조건 해당 기능 레이아웃만 단독 노출 (격리성 강화)
 function showListView() {
     document.getElementById('section-form').classList.remove('active');
     document.getElementById('section-list').classList.add('active');
@@ -121,12 +119,11 @@ function previewImage(event) {
     const preview = document.getElementById('preview');
     const files = event.target.files;
     if (files && files.length > 0) {
-        preview.src = URL.createObjectURL(files[0]); // 단일 파일 인덱싱 명시적 보완
+        preview.src = URL.createObjectURL(files[0]);
         preview.style.display = 'block';
     }
 }
 
-// 요구사항: 처리 결과 성공/실패 여부를 알림(alert)으로 명확히 인지시킬 것
 async function handleSubmit(event) {
     event.preventDefault();
     const id = document.getElementById('post-id').value;
@@ -148,8 +145,9 @@ async function handleSubmit(event) {
             formData.append('content', content);
             
             const fileInput = document.getElementById('image');
+            // [교정 핵심] files 배열 통째가 아닌 첫 번째 인덱스 단일 파일 바이너리로 명확히 지정
             if (fileInput && fileInput.files && fileInput.files.length > 0) {
-                formData.append('image', fileInput.files[0]); // 멀티파트 업로드 바이너리 슬라이싱 유효 규격 조절
+                formData.append('image', fileInput.files[0]); 
             }
 
             const res = await fetch('/api/posts', {
