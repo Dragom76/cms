@@ -1,4 +1,4 @@
-/* [수정 일시: 2026-05-19 01:23:00 KST] CORS 우회용 공용 응답 헤더 탑재 및 파일 바이너리 세팅 완료 */
+/* [수정 일시: 2026-05-19 01:43:00 KST] CORS 우회용 공용 응답 헤더 탑재 및 파일 바이너리 세팅 완료 */
 let allPosts = [];
 
 document.addEventListener("DOMContentLoaded", () => {

@@ -1,4 +1,4 @@
-/* [수정 일시: 2026-05-19 01:23:00 KST] CORS 우회용 공용 응답 헤더 탑재 및 파일 바이너리 세팅 완료 */
+/* [수정 일시: 2026-05-19 01:43:00 KST] CORS 우회용 공용 응답 헤더 탑재 및 파일 바이너리 세팅 완료 */
 require('dotenv').config();
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
@@ -61,7 +61,7 @@ app.post('/api/posts', upload.single('image'), async (req, res) => {
             
             const targetAccountHash = "d2bd09165e854aae8e430eed2401d673";
             // [정정] pub- 접두사를 붙여 브라우저 정적 서빙 주소 규격 완벽 일치 보장
-            image_url = `https://pub-${targetAccountHash}.r2.dev/${process.env.R2_BUCKET_NAME}/${fileName}`;
+            image_url = `https://pub-${targetAccountHash}.r2.dev/${fileName}`;
         }
 
         const { data, error } = await supabase.from('posts').insert([{ title, content, image_url }]).select();
