@@ -1,4 +1,4 @@
-/* [수정 일시: 2026-05-19 01:07:00 KST] 원인 분석을 위한 실시간 데이터베이스 통신 로그 추적 코드 전면 탑재 */
+/* [수정 일시: 2026-05-19 01:10:00 KST] R2 공개 도메인 규격 오류 교정 (pub- 접두사 강제 하드코딩 결합) */
 let allPosts = [];
 
 document.addEventListener("DOMContentLoaded", () => {
