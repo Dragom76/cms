@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- Left bat wing -->
+  <path d="M44,58
+    L8,18 L24,36 L7,26 L28,46 L16,56 Z" fill="#111"/>
+  <path d="M44,58 L8,18" stroke="#111" stroke-width="1.5"/>
+  <path d="M44,58 L7,26" stroke="#111" stroke-width="1.5"/>
+  <path d="M44,58 L16,56" stroke="#111" stroke-width="1.5"/>
+
+  <!-- Right bat wing -->
+  <path d="M68,52
+    L102,14 L88,34 L106,22 L84,42 L96,50 Z" fill="#111"/>
+  <path d="M68,52 L102,14" stroke="#111" stroke-width="1.5"/>
+  <path d="M68,52 L106,22" stroke="#111" stroke-width="1.5"/>
+  <path d="M68,52 L96,50" stroke="#111" stroke-width="1.5"/>
+
+  <!-- Body -->
+  <ellipse cx="55" cy="82" rx="22" ry="17" fill="#111"/>
+
+  <!-- Neck -->
+  <path d="M58,66 C63,54 70,46 78,40"
+    stroke="#111" stroke-width="13" stroke-linecap="round" fill="none"/>
+
+  <!-- Head -->
+  <circle cx="83" cy="36" r="18" fill="#111"/>
+
+  <!-- Snout -->
+  <path d="M93,40 C99,39 104,42 103,47 C101,51 96,52 91,49 C88,47 89,42 93,40Z" fill="#111"/>
+
+  <!-- Eye (white) -->
+  <circle cx="79" cy="30" r="5.5" fill="white"/>
+  <circle cx="80" cy="31" r="3.2" fill="#111"/>
+  <circle cx="79" cy="30" r="1.2" fill="white"/>
+
+  <!-- Horn left -->
+  <polygon points="72,20 68,7 76,19" fill="#111"/>
+  <!-- Horn right -->
+  <polygon points="82,17 82,4 88,16" fill="#111"/>
+
+  <!-- Tail (curling lower-left) -->
+  <path d="M34,92
+    C24,100 17,110 21,116
+    C24,120 29,119 28,113
+    C26,109 29,104 34,101
+    C30,106 30,113 34,114
+    C38,114 40,108 37,102
+    C40,97 38,94 34,92Z" fill="#111"/>
+
+  <!-- Front left paw -->
+  <path d="M46,97 C44,103 43,110 45,112 L50,112
+    C50,108 51,103 50,97Z" fill="#111" rx="3"/>
+  <!-- Front right paw -->
+  <path d="M57,98 C55,104 55,111 57,113 L62,113
+    C62,109 63,104 62,98Z" fill="#111" rx="3"/>
+</svg>

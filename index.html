@@ -1,77 +1,1597 @@
-<!-- [수정 일시: 2026-05-19 02:22:00 KST] 리스트 엑셀 버튼 제거 및 상세 폼 레이아웃 내로 이관 완료 -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ERP 게시물 관리 시스템</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="gnb.js"></script>
-    <script src="footer.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Dragom ERP</title>
+<style>
+/* ══ 디자인 시스템 - Samsung Fire Direct 스타일 ══════════════ */
+:root {
+  --primary:    #003087;
+  --primary-h:  #003FA8;
+  --primary-l:  #E6EEFF;
+  --cta:        #FF6600;
+  --cta-h:      #E05800;
+  --cta-l:      #FFF3EB;
+  --accent:     #0066CC;
+  --success:    #00854A;
+  --success-bg: #E6F4EE;
+  --warn:       #E08800;
+  --warn-bg:    #FFF8E1;
+  --danger:     #CC0A1E;
+  --danger-bg:  #FDEAED;
+  --g50:  #F7F9FC; --g100: #EEF2F8; --g200: #D8E2EE;
+  --g300: #B5C5D8; --g400: #7F98B4; --g500: #5A7490;
+  --g600: #3D5570; --g700: #273D56; --g800: #16273C; --g900: #0B1624;
+  --surface: #fff;
+  --sh-xs: 0 1px 3px rgba(0,0,0,.06);
+  --sh-sm: 0 2px 8px rgba(0,48,135,.07);
+  --sh-md: 0 4px 16px rgba(0,48,135,.10);
+  --sh-lg: 0 8px 32px rgba(0,48,135,.13);
+  --r-xs:2px; --r-sm:4px; --r:6px; --r-lg:8px; --r-xl:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:16px;}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',system-ui,-apple-system,sans-serif;
+     background:var(--g100);color:var(--g800);line-height:1.5;-webkit-text-size-adjust:100%;}
+
+/* ══ 알림 배너 ══════════════════════════════════════════════ */
+.notify-banner{background:var(--cta);color:#fff;padding:10px 20px;
+  display:none;align-items:center;justify-content:space-between;
+  font-size:.875rem;cursor:pointer;gap:8px;}
+.notify-banner.show{display:flex;}
+.notify-banner span{flex:1;}
+.notify-banner button{background:rgba(255,255,255,.25);border:0;color:#fff;
+  padding:5px 14px;border-radius:var(--r-sm);cursor:pointer;font-size:.8rem;
+  white-space:nowrap;flex-shrink:0;font-weight:600;}
+
+/* ══ 헤더 ═══════════════════════════════════════════════════ */
+header{background:#fff;color:var(--g800);padding:0 24px;height:62px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;
+  border-bottom:3px solid var(--primary);
+  box-shadow:0 2px 12px rgba(0,0,0,.08);}
+.hd-brand{display:flex;align-items:center;gap:10px;text-decoration:none;
+  color:var(--primary);flex-shrink:0;cursor:pointer;}
+.hd-brand img{width:34px;height:34px;object-fit:contain;border-radius:4px;}
+.hd-brand-name{font-size:1.15rem;font-weight:800;letter-spacing:-.4px;color:var(--primary);}
+.hd-proj-name{font-size:.78rem;color:var(--surface);padding:2px 10px;
+  background:var(--primary);border-radius:20px;margin-left:6px;white-space:nowrap;
+  overflow:hidden;max-width:140px;text-overflow:ellipsis;font-weight:600;}
+.hd-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.hd-user{font-size:.8rem;color:var(--g500);white-space:nowrap;
+  margin-right:6px;display:flex;flex-direction:column;align-items:flex-end;line-height:1.3;}
+.hd-user strong{color:var(--g800);font-size:.875rem;}
+.hd-btn{width:38px;height:38px;border:1px solid var(--g200);background:var(--g50);
+  color:var(--g500);border-radius:var(--r-sm);cursor:pointer;display:flex;
+  align-items:center;justify-content:center;transition:all .15s;}
+.hd-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+.hd-btn.write{background:var(--cta);color:#fff;border-color:var(--cta);}
+.hd-btn.write:hover{background:var(--cta-h);border-color:var(--cta-h);}
+.hd-btn.mgmt{background:var(--primary-l);color:var(--primary);border-color:var(--primary-l);}
+.hd-btn.mgmt:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+.hd-btn.logout{border-color:var(--g300);}
+.hd-btn.logout:hover{background:var(--danger);color:#fff;border-color:var(--danger);}
+.hd-btn svg{display:block;flex-shrink:0;}
+
+/* ══ 컨테이너 ════════════════════════════════════════════════ */
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px;}
+
+/* ══ 섹션 제목 ══════════════════════════════════════════════ */
+.sec-hd{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:22px;gap:12px;flex-wrap:wrap;}
+.sec-title{font-size:1.2rem;font-weight:800;color:var(--primary);
+  padding-left:12px;border-left:4px solid var(--cta);}
+
+/* ══ 버튼 시스템 ════════════════════════════════════════════ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  border:0;padding:0 20px;height:40px;border-radius:var(--r-sm);cursor:pointer;
+  font-size:.875rem;font-weight:700;transition:all .15s;white-space:nowrap;
+  text-decoration:none;line-height:1;letter-spacing:-.2px;}
+.btn-primary{background:var(--primary);color:#fff;}
+.btn-primary:hover{background:var(--primary-h);}
+.btn-cta{background:var(--cta);color:#fff;}
+.btn-cta:hover{background:var(--cta-h);}
+.btn-accent{background:var(--accent);color:#fff;}
+.btn-accent:hover{background:#0052A8;}
+.btn-success{background:var(--success);color:#fff;}
+.btn-success:hover{background:#006C3B;}
+.btn-warn{background:var(--warn);color:#fff;}
+.btn-warn:hover{background:#B87000;}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-danger:hover{background:#A00818;}
+.btn-ghost{background:#fff;color:var(--primary);border:1px solid var(--primary);}
+.btn-ghost:hover{background:var(--primary-l);}
+.btn-sm{height:32px;padding:0 14px;font-size:.8rem;}
+.btn-lg{height:46px;padding:0 26px;font-size:.97rem;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* ══ 카드 ════════════════════════════════════════════════════ */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px;}
+.card{background:var(--surface);border:1px solid var(--g200);border-radius:var(--r-lg);
+  overflow:hidden;box-shadow:var(--sh-sm);transition:box-shadow .2s,transform .2s;
+  border-top:3px solid var(--primary);}
+.card:hover{box-shadow:var(--sh-md);transform:translateY(-2px);}
+.card-img{width:100%;height:160px;object-fit:cover;display:block;}
+.card-body{padding:16px;}
+.card-title{font-size:1rem;font-weight:700;color:var(--primary);cursor:pointer;
+  margin-bottom:5px;line-height:1.4;}
+.card-title:hover{color:var(--cta);text-decoration:underline;}
+.card-excerpt{font-size:.85rem;color:var(--g600);overflow:hidden;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;margin-bottom:8px;}
+.card-file-link{font-size:.82rem;color:var(--accent);padding:3px 0;display:block;}
+.card-meta{font-size:.78rem;color:var(--g400);}
+.card-actions{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--g100);}
+
+/* ══ 프로젝트 카드 ══════════════════════════════════════════ */
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px;}
+.proj-card{background:var(--surface);border:1px solid var(--g200);border-radius:var(--r-lg);
+  padding:0;box-shadow:var(--sh-sm);overflow:hidden;cursor:pointer;
+  transition:box-shadow .2s,transform .2s;border-top:4px solid var(--primary);}
+.proj-card:hover{box-shadow:var(--sh-md);transform:translateY(-2px);}
+.proj-card-hd{background:var(--primary);padding:20px 20px 16px;color:#fff;
+  position:relative;overflow:hidden;}
+.proj-card-hd::after{content:'';position:absolute;right:-20px;top:-20px;
+  width:80px;height:80px;background:rgba(255,255,255,.06);border-radius:50%;}
+.proj-card-name{font-size:1.05rem;font-weight:800;margin-bottom:5px;line-height:1.3;}
+.proj-card-code{font-size:.75rem;opacity:.7;background:rgba(255,255,255,.15);
+  display:inline-block;padding:2px 8px;border-radius:20px;}
+.proj-card-body{padding:16px 20px;}
+.proj-card-desc{font-size:.85rem;color:var(--g600);margin-bottom:12px;
+  overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-height:2.4em;}
+.proj-card-stats{display:flex;gap:16px;font-size:.8rem;color:var(--g500);}
+.proj-card-stats span{display:flex;align-items:center;gap:4px;}
+.proj-card-ft{padding:10px 20px;border-top:1px solid var(--g100);
+  display:flex;justify-content:flex-end;background:var(--g50);}
+.btn-proj-settings{background:#fff;border:1px solid var(--g300);color:var(--g600);
+  padding:4px 14px;height:30px;border-radius:var(--r-sm);cursor:pointer;
+  font-size:.78rem;font-weight:600;transition:all .15s;}
+.btn-proj-settings:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+
+/* ══ 상세 보기 ══════════════════════════════════════════════ */
+.detail-card{background:var(--surface);border-radius:var(--r-lg);
+  box-shadow:var(--sh-sm);border:1px solid var(--g200);overflow:hidden;}
+.detail-hd{padding:20px 24px;border-bottom:2px solid var(--g100);
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  background:linear-gradient(to right,var(--primary-l),#fff);}
+.detail-body{padding:24px;}
+.detail-title{font-size:1.3rem;font-weight:800;color:var(--g800);margin-bottom:6px;line-height:1.4;}
+.detail-meta{font-size:.82rem;color:var(--g500);}
+.detail-img{max-width:100%;border-radius:var(--r);margin:18px 0;display:block;box-shadow:var(--sh-sm);}
+.detail-file-link{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;
+  background:var(--primary-l);border-radius:var(--r-sm);color:var(--primary);
+  text-decoration:none;font-size:.875rem;margin:14px 0;border:1px solid var(--g200);font-weight:600;}
+.detail-content{white-space:pre-wrap;line-height:1.9;font-size:.95rem;color:var(--g700);
+  margin:16px 0;}
+.detail-actions{display:flex;gap:8px;padding-top:16px;border-top:1px solid var(--g100);}
+
+/* ══ 댓글 시스템 ════════════════════════════════════════════ */
+.comments-section{margin-top:16px;}
+.comments-hd{padding:14px 24px;background:var(--primary);border-top:none;
+  font-size:.9rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px;}
+.comment-list{padding:0 24px;}
+.comment-item{padding:16px 0;border-bottom:1px solid var(--g100);}
+.comment-item:last-child{border-bottom:none;}
+.comment-author-row{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:8px;flex-wrap:wrap;gap:6px;}
+.comment-author-tag{font-size:.82rem;font-weight:700;color:var(--primary);
+  background:var(--primary-l);padding:3px 10px;border-radius:20px;
+  display:inline-flex;align-items:center;gap:4px;border:1px solid rgba(0,48,135,.15);}
+.comment-date{font-size:.78rem;color:var(--g400);}
+.comment-img{max-width:100%;max-height:240px;border-radius:var(--r-sm);display:block;margin:10px 0;box-shadow:var(--sh-xs);}
+.comment-file{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;
+  background:var(--primary-l);border-radius:var(--r-sm);color:var(--primary);
+  text-decoration:none;font-size:.82rem;margin:8px 0;border:1px solid var(--g200);font-weight:600;}
+.comment-content{font-size:.9rem;color:var(--g700);white-space:pre-wrap;line-height:1.7;}
+
+/* 댓글 작성 폼 */
+.comment-form-wrap{padding:20px 24px;background:var(--g50);border-top:1px solid var(--g200);}
+.comment-form-title{font-size:.875rem;font-weight:700;color:var(--g700);margin-bottom:12px;}
+.comment-textarea{width:100%;padding:10px 14px;border:1px solid var(--g300);border-radius:var(--r-sm);
+  font:inherit;font-size:.9rem;resize:vertical;min-height:80px;
+  transition:border-color .15s;background:var(--surface);}
+.comment-textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,48,135,.08);}
+
+/* ══ 첨부 영역 ══════════════════════════════════════════════ */
+.attach-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.attach-btn{display:inline-flex;align-items:center;justify-content:center;
+  width:40px;height:40px;background:#fff;color:var(--g500);
+  border-radius:var(--r-sm);cursor:pointer;border:1px solid var(--g300);
+  transition:all .15s;flex-shrink:0;}
+.attach-btn:hover{background:var(--primary-l);color:var(--primary);border-color:var(--primary);}
+.attach-btn input[type=file]{display:none;}
+@media(pointer:fine){.camera-only{display:none !important;}}
+.overlay-area{margin-top:10px;padding:12px 14px;background:#FFF8E1;
+  border:1px solid #FFD84D;border-radius:var(--r-sm);}
+.overlay-area label{font-size:.82rem;color:#7A5800;display:block;margin-bottom:6px;font-weight:600;}
+.overlay-row{display:flex;gap:8px;align-items:center;}
+.overlay-row input{flex:1;padding:7px 10px;border:1px solid var(--g300);border-radius:var(--r-sm);
+  font:inherit;font-size:.875rem;min-height:36px;}
+.btn-overlay{background:var(--cta);color:#fff;border:0;padding:0 14px;height:36px;
+  border-radius:var(--r-sm);cursor:pointer;font-size:.83rem;white-space:nowrap;font-weight:700;}
+.btn-overlay:disabled{opacity:.5;cursor:not-allowed;}
+.preview-area{margin-top:10px;}
+.preview-area img{max-width:100%;max-height:260px;border-radius:var(--r-sm);display:block;}
+.file-badge{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;
+  background:var(--primary-l);border-radius:var(--r-sm);font-size:.85rem;color:var(--primary);
+  border:1px solid var(--g200);font-weight:600;}
+
+/* ══ 폼 ══════════════════════════════════════════════════════ */
+.form-card{background:var(--surface);border-radius:var(--r-lg);
+  box-shadow:var(--sh-sm);border:1px solid var(--g200);}
+.form-hd{padding:16px 24px;border-bottom:2px solid var(--g100);
+  display:flex;align-items:center;gap:10px;
+  background:linear-gradient(to right,var(--primary-l),#fff);}
+.form-body-inner{padding:20px 24px;display:flex;flex-direction:column;gap:14px;}
+.form-input{width:100%;padding:10px 14px;border:1px solid var(--g300);border-radius:var(--r-sm);
+  font:inherit;font-size:.95rem;transition:border-color .15s;background:var(--surface);}
+.form-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,48,135,.08);}
+textarea.form-input{resize:vertical;min-height:120px;}
+.form-btns{display:flex;gap:8px;flex-wrap:wrap;}
+
+/* ══ 모달 ════════════════════════════════════════════════════ */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,20,40,.55);
+  z-index:200;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--surface);border-radius:var(--r-xl);padding:28px;
+  width:100%;max-width:440px;box-shadow:var(--sh-lg);border-top:4px solid var(--primary);}
+.modal-wide{max-width:560px;max-height:88vh;overflow-y:auto;}
+.modal h3{font-size:1.05rem;font-weight:800;color:var(--primary);margin-bottom:18px;}
+.modal h4{font-size:.9rem;font-weight:700;color:var(--g600);
+  margin:18px 0 10px;padding-top:16px;border-top:1px solid var(--g100);}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:.82rem;font-weight:700;color:var(--g600);margin-bottom:5px;}
+.field input,.field textarea{width:100%;padding:9px 12px;border:1px solid var(--g300);
+  border-radius:var(--r-sm);font:inherit;font-size:.9rem;transition:border-color .15s;}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--primary);}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+.modal-msg{font-size:.83rem;margin:6px 0;min-height:1.2em;}
+.modal-msg.ok{color:var(--success);}
+.modal-msg.err{color:var(--danger);}
+
+/* ══ 멤버 행 ════════════════════════════════════════════════ */
+.member-row{display:flex;align-items:center;justify-content:space-between;
+  padding:8px 0;border-bottom:1px solid var(--g100);font-size:.875rem;}
+.member-row:last-child{border-bottom:none;}
+
+/* ══ 배지 ════════════════════════════════════════════════════ */
+.badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:.75rem;font-weight:700;}
+.badge.active  {background:var(--success-bg);color:var(--success);}
+.badge.pending {background:var(--cta-l);color:var(--cta);}
+.badge.inactive{background:var(--g100);color:var(--g500);}
+
+/* ══ 인원관리 ═══════════════════════════════════════════════ */
+.mgmt-warn{background:var(--danger-bg);border:1px solid #F5B8BF;border-radius:var(--r-sm);
+  padding:10px 14px;font-size:.82rem;color:#8C0616;margin-bottom:16px;}
+.user-table{width:100%;border-collapse:collapse;font-size:.875rem;}
+.user-table th{background:var(--primary);padding:11px 12px;text-align:left;
+  border-bottom:none;font-size:.8rem;font-weight:700;color:rgba(255,255,255,.9);
+  letter-spacing:.03em;}
+.user-table th:first-child{border-radius:var(--r-sm) 0 0 0;}
+.user-table th:last-child{border-radius:0 var(--r-sm) 0 0;}
+.user-table td{padding:10px 12px;border-bottom:1px solid var(--g100);vertical-align:middle;}
+.user-table tr:hover td{background:var(--primary-l);}
+.row-pending td{color:var(--primary);}
+.name-link{color:var(--primary);cursor:pointer;font-weight:700;}
+.name-link:hover{text-decoration:underline;color:var(--cta);}
+.table-wrap{overflow-x:auto;border-radius:var(--r-sm);border:1px solid var(--g200);
+  box-shadow:var(--sh-xs);}
+.user-detail-card{background:var(--surface);border-radius:var(--r-lg);
+  padding:24px;border:1px solid var(--g200);box-shadow:var(--sh-sm);}
+.ud-row{margin-bottom:14px;}
+.ud-label{font-size:.75rem;font-weight:700;color:var(--g500);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.ud-val{font-size:.95rem;color:var(--g800);}
+.pw-row{display:flex;align-items:center;gap:8px;}
+.pw-val{font-family:monospace;letter-spacing:.1em;}
+.eye-btn{background:#fff;border:1px solid var(--g200);border-radius:var(--r-sm);
+  padding:4px 10px;cursor:pointer;color:var(--g500);font-size:.78rem;}
+.eye-btn:hover{background:var(--primary-l);color:var(--primary);}
+.ud-select{padding:7px 10px;border:1px solid var(--g300);border-radius:var(--r-sm);
+  font:inherit;font-size:.875rem;width:100%;max-width:260px;}
+.ud-save-wrap{margin-top:16px;padding-top:16px;border-top:1px solid var(--g100);}
+.ud-projs-wrap{margin-top:18px;padding-top:16px;border-top:1px solid var(--g100);}
+.ud-projs-title{font-size:.8rem;font-weight:700;color:var(--g500);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+
+/* ══ 뒤로가기 행 ════════════════════════════════════════════ */
+.back-row{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;
+  padding:12px 16px;background:#fff;border-radius:var(--r-sm);
+  border:1px solid var(--g200);box-shadow:var(--sh-xs);}
+.back-proj-name{font-size:.95rem;font-weight:700;color:var(--primary);}
+.msg{font-size:.85rem;margin-top:6px;min-height:1.2em;}
+.msg.ok {color:var(--success);}
+.msg.err{color:var(--danger);}
+
+/* ══ 반응형 ══════════════════════════════════════════════════ */
+@media(max-width:768px){
+  .wrap{padding:16px 12px;}
+  .hd-user{display:none;}
+  .hd-proj-name{max-width:90px;}
+  .card-grid,.proj-grid{grid-template-columns:1fr;}
+  .detail-body,.comment-form-wrap,.comment-list,.comments-hd{padding-left:16px;padding-right:16px;}
+  .detail-hd{padding:14px 16px;}
+  .form-body-inner{padding:16px;}
+  .form-hd{padding:14px 16px;}
+  .user-detail-card{padding:16px;}
+  .btn-lg{height:48px;font-size:1rem;}
+  .form-input,.comment-textarea{font-size:16px !important;}
+  .field input,.field textarea{font-size:16px !important;}
+}
+@media(max-width:480px){
+  header{padding:0 14px;height:56px;}
+  .modal{padding:20px 16px;}
+  .proj-card-hd{padding:16px;}
+  .proj-card-body{padding:12px 16px;}
+  .proj-card-ft{padding:8px 16px;}
+}
+</style>
 </head>
 <body>
 
-    <div class="erp-container">
-        <!-- 1. 리스트 단독 화면 섹션 (엑셀 다운로드 버튼 제거됨) -->
-        <div id="section-list" class="page-section">
-            <div class="erp-card">
-                <div class="card-title">
-                    <span>게시물 마스터 리스트</span>
-                    <div class="list-header-actions">
-                        <button type="button" id="btn-open-write" class="btn btn-primary">➕ 신규 게시물 등록</button>
-                    </div>
-                </div>
-                <table class="erp-table">
-                    <thead>
-                        <tr>
-                            <th>순번</th>
-                            <th>제목</th>
-                            <th>작성일</th>
-                        </tr>
-                    </thead>
-                    <tbody id="post-list">
-                        <!-- gnb.js 바인딩 주입 -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
+<!-- 신규인원 알림 배너 -->
+<div id="notifyBanner" class="notify-banner" onclick="openMgmt()">
+  <span>🔔 신규인원 신청이 도착했습니다.</span>
+  <button onclick="event.stopPropagation();dismissBanner()">닫기</button>
+</div>
 
-        <!-- 2. 작성/읽기/수정 격리 독립 화면 섹션 (상세페이지 내 엑셀 버튼 배치) -->
-        <div id="section-form" class="page-section">
-            <div class="erp-card">
-                <div class="card-title">
-                    <span id="form-title">신규 게시물 등록</span>
-                    <div class="list-header-actions">
-                        <!-- 요구사항: 엑셀 다운로드 단추를 상세페이지 내부 조작 영역으로 이관 -->
-                        <button type="button" id="btn-download-excel" class="btn btn-excel" style="display: none;">📊 엑셀 다운로드</button>
-                        <button type="button" id="btn-close-form" class="btn btn-secondary">목록으로 가기 ✖</button>
-                    </div>
-                </div>
-                <form id="post-form">
-                    <input type="hidden" id="post-id">
-                    <div class="form-group">
-                        <label>제목</label>
-                        <input type="text" id="title" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>내용</label>
-                        <textarea id="content" class="form-control" rows="6"></textarea>
-                    </div>
-                    <div class="form-group" id="image-upload-wrapper">
-                        <label>이미지 첨부 (모바일의 경우 카메라 촬영 가능)</label>
-                        <input type="file" id="image" class="form-control" accept="image/*" capture="environment">
-                    </div>
-                    <div class="form-group">
-                        <img id="preview" class="img-preview">
-                    </div>
-                    <div class="form-buttons-wrapper">
-                        <button type="button" id="btn-delete" class="btn btn-danger">삭제</button>
-                        <button type="submit" id="btn-submit" class="btn btn-primary">저장</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+<header>
+  <div class="hd-brand" onclick="goBackToDashboard()">
+    <img src="/logo.png" alt="Dragom">
+    <span class="hd-brand-name">Dragom</span>
+    <span class="hd-proj-name" id="hdProjName" style="display:none"></span>
+  </div>
+  <div class="hd-right">
+    <div class="hd-user">
+      <strong id="headerUserName"></strong>
+      <span id="headerUserRole"></span>
+    </div>
+    <!-- 인원관리 -->
+    <button class="hd-btn mgmt" id="mgmtBtn" title="인원관리" style="display:none" onclick="openMgmt()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    </button>
+    <!-- 새로고침 -->
+    <button class="hd-btn" id="refreshBtn" title="새로고침">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      </svg>
+    </button>
+    <!-- 목록 -->
+    <button class="hd-btn" id="listBtn" title="목록">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+        <line x1="8" y1="18" x2="21" y2="18"/>
+        <circle cx="3" cy="6" r="1" fill="currentColor" stroke="none"/>
+        <circle cx="3" cy="12" r="1" fill="currentColor" stroke="none"/>
+        <circle cx="3" cy="18" r="1" fill="currentColor" stroke="none"/>
+      </svg>
+    </button>
+    <!-- 글쓰기 -->
+    <button class="hd-btn write" id="newBtn" title="글쓰기" style="display:none;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
+    </button>
+    <!-- 로그아웃 -->
+    <button class="hd-btn logout" title="로그아웃" onclick="doLogout()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- ══ 대시보드 ══════════════════════════════════════════════ -->
+<section id="dashSection">
+  <div class="sec-hd">
+    <h2 class="sec-title">프로젝트 목록</h2>
+    <button class="btn btn-primary" id="newProjBtn" style="display:none" onclick="openNewProjectModal()">
+      + 프로젝트 생성
+    </button>
+  </div>
+  <div id="projGrid" class="proj-grid"></div>
+</section>
+
+<!-- ══ 프로젝트 생성 모달 ════════════════════════════════════ -->
+<div class="modal-overlay" id="projModal">
+  <div class="modal">
+    <h3>새 프로젝트 생성</h3>
+    <div class="field"><label>프로젝트명 <span style="color:var(--danger)">*</span></label>
+      <input type="text" id="projName" placeholder="예: 한강 교량 공사"></div>
+    <div class="field"><label>프로젝트 코드</label>
+      <input type="text" id="projCode" placeholder="예: HK-2026 (선택)"></div>
+    <div class="field"><label>설명</label>
+      <textarea id="projDesc" rows="3" style="resize:vertical;" placeholder="프로젝트 설명 (선택)"></textarea></div>
+    <div class="modal-msg err" id="projModalErr"></div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeProjModal()">취소</button>
+      <button class="btn btn-primary" onclick="createProject()">생성</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 프로젝트 설정 모달 (ADMIN) ════════════════════════════ -->
+<div class="modal-overlay" id="projSettingsModal">
+  <div class="modal modal-wide">
+    <h3 id="psModalTitle">프로젝트 설정</h3>
+    <div class="field"><label>프로젝트명 <span style="color:var(--danger)">*</span></label>
+      <input type="text" id="psName"></div>
+    <div class="field"><label>설명</label>
+      <textarea id="psDesc" rows="2" style="resize:vertical;"></textarea></div>
+    <div class="modal-msg" id="psInfoMsg"></div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeProjSettings()">닫기</button>
+      <button class="btn btn-primary" onclick="saveProjectSettings()">정보 저장</button>
+    </div>
+    <h4>멤버 관리</h4>
+    <div id="psMemberList" style="margin-bottom:12px;min-height:40px;"></div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <select id="psUserSelect" style="flex:1;padding:8px 10px;border:1px solid var(--g300);border-radius:var(--r-sm);font:inherit;font-size:.875rem;">
+        <option value="">-- 멤버 추가 선택 --</option>
+      </select>
+      <button class="btn btn-accent btn-sm" onclick="addProjectMember()">추가</button>
+    </div>
+    <div class="modal-msg err" id="psMemberErr"></div>
+  </div>
+</div>
+
+<!-- ══ 목록 ══════════════════════════════════════════════════ -->
+<section id="listSection" style="display:none">
+  <div class="back-row" id="listProjHeader" style="display:none">
+    <button class="btn btn-ghost btn-sm" onclick="goBackToDashboard()">← 프로젝트 목록</button>
+    <span class="back-proj-name" id="listProjName"></span>
+  </div>
+  <div id="posts" class="card-grid"></div>
+</section>
+
+<!-- ══ 상세 ══════════════════════════════════════════════════ -->
+<section id="detailSection" style="display:none">
+  <div class="back-row">
+    <button class="btn btn-ghost btn-sm" id="backBtn">← 목록으로</button>
+  </div>
+  <div class="detail-card">
+    <div class="detail-body">
+      <h2 class="detail-title" id="detailTitle"></h2>
+      <div class="detail-meta" id="detailMeta"></div>
+      <img id="detailImg" src="" alt="" style="display:none" class="detail-img">
+      <a id="detailFile" href="" target="_blank" class="detail-file-link" style="display:none">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.41 17.41a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+        </svg>
+        <span id="detailFileName">파일 다운로드</span>
+      </a>
+      <div class="detail-content" id="detailContent"></div>
+      <div class="detail-actions">
+        <button class="btn btn-warn btn-sm" id="detailEditBtn">수정</button>
+        <button class="btn btn-danger btn-sm" id="detailDelBtn">삭제</button>
+      </div>
     </div>
 
+    <!-- ══ 댓글 영역 ══════════════════════════════════════════ -->
+    <div class="comments-section">
+      <div class="comments-hd">
+        💬 추가 의견
+        <span id="commentCount" style="background:var(--g200);color:var(--g600);font-size:.75rem;padding:1px 8px;border-radius:20px;font-weight:600;"></span>
+      </div>
+      <div class="comment-list" id="commentsList"></div>
+
+      <!-- 댓글 작성 폼 -->
+      <div class="comment-form-wrap">
+        <div class="comment-form-title">의견 등록</div>
+        <textarea id="cContent" class="comment-textarea" placeholder="의견 내용을 입력하세요..."></textarea>
+        <div class="attach-row">
+          <!-- 파일/이미지 -->
+          <label class="attach-btn" title="파일/이미지 첨부">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.41 17.41a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+            </svg>
+            <input id="cFileInput" type="file">
+          </label>
+          <!-- 카메라 (모바일) -->
+          <label class="attach-btn camera-only" title="카메라 촬영">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+            <input id="cCameraInput" type="file" accept="image/*" capture="environment">
+          </label>
+        </div>
+        <div id="cOverlayArea" class="overlay-area" style="display:none">
+          <label>사진에 넣을 문구 (최대 20자 · 날짜·이름 자동 포함)</label>
+          <div class="overlay-row">
+            <input id="cOverlayText" type="text" maxlength="20" placeholder="짧은 문구 (선택)">
+            <button type="button" class="btn-overlay" id="cApplyOverlayBtn">미리보기 적용</button>
+          </div>
+        </div>
+        <div id="cPreviewArea" class="preview-area"></div>
+        <div style="margin-top:10px;">
+          <button class="btn btn-primary" id="cSubmitBtn" onclick="submitComment()">의견 등록</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 인원관리 ══════════════════════════════════════════════ -->
+<section id="mgmtSection" style="display:none">
+  <div class="back-row">
+    <button class="btn btn-ghost btn-sm" onclick="currentProjectId?showSection('list'):loadDashboard()">← 목록으로</button>
+    <span class="sec-title">인원 관리</span>
+  </div>
+  <div class="mgmt-warn">⚠ 타인의 개인정보를 사유 없이 열람하는 것은 법에 저촉될 수 있습니다.</div>
+
+  <div id="userListWrap">
+    <div class="table-wrap" id="userTableWrap"></div>
+  </div>
+
+  <div id="userDetailWrap" style="display:none">
+    <div class="back-row">
+      <button class="btn btn-ghost btn-sm" onclick="closeUserDetail()">← 목록으로</button>
+    </div>
+    <div class="user-detail-card">
+      <div class="ud-row"><div class="ud-label">이름</div><div class="ud-val" id="udName"></div></div>
+      <div class="ud-row"><div class="ud-label">아이디</div><div class="ud-val" id="udId"></div></div>
+      <div class="ud-row">
+        <div class="ud-label">비밀번호</div>
+        <div class="ud-val pw-row">
+          <span class="pw-val" id="udPw">••••••••••</span>
+          <button class="eye-btn" id="eyeBtn" onclick="togglePw()">👁 보기</button>
+        </div>
+      </div>
+      <div class="ud-row"><div class="ud-label">소셜 인증</div><div class="ud-val" id="udSocial"></div></div>
+      <div class="ud-row"><div class="ud-label">가입일</div><div class="ud-val" id="udCreated"></div></div>
+      <div class="ud-row" id="udRoleRow">
+        <div class="ud-label">역할</div>
+        <select class="ud-select" id="udRoleSelect"></select>
+      </div>
+      <div class="ud-row" id="udStatusRow">
+        <div class="ud-label">상태</div>
+        <select class="ud-select" id="udStatusSelect">
+          <option value="PENDING">미승인</option>
+          <option value="ACTIVE">활성</option>
+          <option value="INACTIVE">비활성</option>
+        </select>
+      </div>
+      <div class="ud-save-wrap">
+        <button class="btn btn-primary" id="udSaveBtn" style="display:none" onclick="saveUserDetail()">저장</button>
+        <div class="msg" id="udSaveMsg"></div>
+      </div>
+      <!-- 프로젝트 배정 (ADMIN) -->
+      <div id="udProjectsRow" style="display:none" class="ud-projs-wrap">
+        <div class="ud-projs-title">프로젝트 배정</div>
+        <div id="udProjects"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 글쓰기/수정 폼 ════════════════════════════════════════ -->
+<section id="formSection" style="display:none">
+  <div class="back-row">
+    <button class="btn btn-ghost btn-sm" id="formListBtn">← 목록으로</button>
+  </div>
+  <div class="form-card">
+    <div class="form-hd">
+      <span style="font-weight:700;color:var(--g700);font-size:.95rem;" id="formTitle">글쓰기</span>
+    </div>
+    <form id="postForm" class="form-body-inner">
+      <input id="fTitle" name="title" type="text" class="form-input" placeholder="제목" required>
+      <textarea id="fContent" name="content" rows="6" class="form-input" placeholder="내용"></textarea>
+      <div class="attach-row">
+        <label class="attach-btn" title="파일/이미지">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.41 17.41a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+          </svg>
+          <input id="fileInput" name="image" type="file">
+        </label>
+        <label class="attach-btn camera-only" title="카메라 촬영">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          <input id="cameraInput" type="file" accept="image/*" capture="environment">
+        </label>
+      </div>
+      <div id="overlayArea" class="overlay-area" style="display:none">
+        <label>사진에 넣을 문구 (최대 20자 · 날짜+제목 자동 포함)</label>
+        <div class="overlay-row">
+          <input id="overlayText" type="text" maxlength="20" placeholder="짧은 문구 (선택)">
+          <button type="button" class="btn-overlay" id="applyOverlayBtn">미리보기 적용</button>
+        </div>
+      </div>
+      <div id="previewArea" class="preview-area"></div>
+      <div class="form-btns">
+        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">등록</button>
+        <button type="button" class="btn btn-ghost" id="cancelBtn">취소</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<script>
+/* ════════════════════════════════
+   인증 초기화
+════════════════════════════════ */
+const MGMT_ROLES = ['ADMIN','CM','SA'];
+let currentUser  = null;
+
+async function initAuth() {
+  try {
+    const r = await fetch('/api/auth/me');
+    if (!r.ok) { location.href = '/login'; return; }
+    currentUser = await r.json();
+    if (!currentUser) { location.href = '/login'; return; }
+    document.getElementById('headerUserName').textContent = currentUser.name;
+    document.getElementById('headerUserRole').textContent = currentUser.role;
+    if (MGMT_ROLES.includes(currentUser.role)) {
+      document.getElementById('mgmtBtn').style.display = '';
+      checkPending();
+    }
+    if (currentUser.role === 'ADMIN') {
+      document.getElementById('newProjBtn').style.display = '';
+    }
+  } catch(e) { location.href = '/login'; }
+}
+
+async function checkPending() {
+  try {
+    const r = await fetch('/api/users/pending-count');
+    const d = await r.json();
+    if (d.count > 0) document.getElementById('notifyBanner').classList.add('show');
+  } catch(e) {}
+}
+
+async function doLogout() {
+  await fetch('/api/auth/logout', { method:'POST' });
+  location.href = '/login';
+}
+
+function dismissBanner() {
+  document.getElementById('notifyBanner').classList.remove('show');
+}
+
+/* ════════════════════════════════
+   상태 & DOM 참조
+════════════════════════════════ */
+const listSection   = document.getElementById('listSection');
+const detailSection = document.getElementById('detailSection');
+const mgmtSection   = document.getElementById('mgmtSection');
+const formSection   = document.getElementById('formSection');
+const postsEl       = document.getElementById('posts');
+const postForm      = document.getElementById('postForm');
+const fileInput     = document.getElementById('fileInput');
+const cameraInput   = document.getElementById('cameraInput');
+const previewArea   = document.getElementById('previewArea');
+const overlayArea   = document.getElementById('overlayArea');
+
+let editingId    = null;
+let currentPost  = null;
+let composedFile = null;
+let cameraMode   = false;
+
+/* ════════════════════════════════
+   유틸
+════════════════════════════════ */
+const IMG_EXTS = new Set(['jpg','jpeg','png','gif','webp','bmp','svg','heic','heif','avif']);
+function isImageUrl(url) { if(!url) return false; return IMG_EXTS.has(url.split('?')[0].split('.').pop().toLowerCase()); }
+function isImageFile(f)  { return f.type.startsWith('image/') || IMG_EXTS.has(f.name.split('.').pop().toLowerCase()); }
+function fmtSize(b) { return b<1048576 ? (b/1024).toFixed(1)+' KB' : (b/1048576).toFixed(1)+' MB'; }
+function fileName(url) { return decodeURIComponent(url.split('/').pop().split('?')[0]); }
+
+/* ════════════════════════════════
+   화면 전환
+════════════════════════════════ */
+let _navHistoryInit      = false;
+let _suppressHistoryPush = false;
+let _currentNavState     = { section: 'dash' };
+
+function showSection(name) {
+  document.getElementById('dashSection').style.display  = name==='dash'   ? '' : 'none';
+  listSection.style.display   = name==='list'   ? '' : 'none';
+  detailSection.style.display = name==='detail' ? '' : 'none';
+  mgmtSection.style.display   = name==='mgmt'   ? '' : 'none';
+  formSection.style.display   = name==='form'   ? '' : 'none';
+  if (name==='list') document.getElementById('listProjHeader').style.display = currentProjectId ? 'flex' : 'none';
+  window.scrollTo({top:0,behavior:'smooth'});
+  if (!_suppressHistoryPush) {
+    _currentNavState = { section: name, projectId: currentProjectId, projectName: currentProjectName };
+    if (!_navHistoryInit) {
+      history.replaceState(_currentNavState, '', '/');
+      _navHistoryInit = true;
+    } else {
+      history.pushState(_currentNavState, '', '/');
+    }
+  }
+}
+
+/* ════════════════════════════════
+   목록
+════════════════════════════════ */
+async function fetchPosts() {
+  postsEl.innerHTML = '<div style="padding:20px;color:var(--g400);text-align:center;">불러오는 중...</div>';
+  try {
+    const url = currentProjectId ? `/api/board?projectId=${currentProjectId}` : '/api/board';
+    const data = await fetch(url).then(r=>r.json());
+    renderPosts(data);
+  } catch(e) {
+    postsEl.innerHTML = '<div style="padding:20px;color:var(--danger);">로드 실패</div>';
+  }
+}
+
+function renderPosts(items) {
+  if (!items || !items.length) {
+    postsEl.innerHTML = '<div style="padding:24px;color:var(--g400);text-align:center;grid-column:1/-1;">등록된 게시글이 없습니다.</div>';
+    return;
+  }
+  postsEl.innerHTML = '';
+  items.forEach(it => {
+    const card = document.createElement('article');
+    card.className = 'card';
+
+    const body = document.createElement('div');
+    body.className = 'card-body';
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'card-title';
+    titleEl.textContent = it.TITLE || '(무제)';
+    titleEl.onclick = () => openDetail(it);
+
+    const src = it.IMAGE_PATH;
+    if (src) {
+      if (isImageUrl(src)) {
+        const img = document.createElement('img');
+        img.src = src; img.alt = '이미지'; img.className = 'card-img';
+        card.insertBefore(img, card.firstChild);
+      } else {
+        const link = document.createElement('div');
+        link.className = 'card-file-link';
+        link.textContent = '📎 ' + fileName(src);
+        body.appendChild(link);
+      }
+    }
+
+    const excerpt = document.createElement('div');
+    excerpt.className = 'card-excerpt';
+    excerpt.textContent = it.CONTENT || '';
+
+    const meta = document.createElement('div');
+    meta.className = 'card-meta';
+    meta.textContent = (it.AUTHOR_NAME ? it.AUTHOR_NAME + ' · ' : '') + (it.CREATED_AT || '');
+
+    body.appendChild(titleEl);
+    body.appendChild(excerpt);
+    body.appendChild(meta);
+
+    const actions = document.createElement('div');
+    actions.className = 'card-actions';
+    const editBtn = document.createElement('button');
+    editBtn.className = 'btn btn-warn btn-sm'; editBtn.textContent = '수정';
+    editBtn.onclick = e => { e.stopPropagation(); openEdit(it); };
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn btn-danger btn-sm'; delBtn.textContent = '삭제';
+    delBtn.onclick = e => { e.stopPropagation(); removePost(it); };
+    actions.appendChild(editBtn); actions.appendChild(delBtn);
+    body.appendChild(actions);
+
+    card.appendChild(body);
+    postsEl.appendChild(card);
+  });
+}
+
+/* ════════════════════════════════
+   상세
+════════════════════════════════ */
+function openDetail(item) {
+  currentPost = item;
+  document.getElementById('detailTitle').textContent   = item.TITLE   || '(무제)';
+  document.getElementById('detailMeta').textContent    = (item.AUTHOR_NAME ? item.AUTHOR_NAME + ' · ' : '') + (item.CREATED_AT || '');
+  document.getElementById('detailContent').textContent = item.CONTENT || '';
+
+  const detailImg  = document.getElementById('detailImg');
+  const detailFile = document.getElementById('detailFile');
+  const src = item.IMAGE_PATH;
+  if (src && isImageUrl(src)) {
+    detailImg.src = src; detailImg.style.display = 'block';
+    detailFile.style.display = 'none';
+  } else if (src) {
+    detailFile.href = src;
+    document.getElementById('detailFileName').textContent = fileName(src);
+    detailFile.style.display = ''; detailImg.style.display = 'none';
+  } else {
+    detailImg.style.display = 'none'; detailFile.style.display = 'none';
+  }
+  showSection('detail');
+  loadComments(item.ID || item.id);
+}
+
+/* ════════════════════════════════
+   수정 폼
+════════════════════════════════ */
+function openEdit(item) {
+  editingId = item.ID || item.id;
+  document.getElementById('fTitle').value   = item.TITLE   || '';
+  document.getElementById('fContent').value = item.CONTENT || '';
+  document.getElementById('formTitle').textContent = '수정';
+  resetAttach();
+  if (item.IMAGE_PATH) showExistingPreview(item.IMAGE_PATH);
+  showSection('form');
+}
+
+function showExistingPreview(url) {
+  previewArea.innerHTML = '';
+  if (isImageUrl(url)) {
+    const img = document.createElement('img');
+    img.src = url; previewArea.appendChild(img);
+  } else {
+    const div = document.createElement('div');
+    div.className = 'file-badge'; div.textContent = '📎 ' + fileName(url);
+    previewArea.appendChild(div);
+  }
+}
+
+/* ════════════════════════════════
+   삭제
+════════════════════════════════ */
+async function removePost(item) {
+  if (!confirm('삭제하시겠습니까?')) return;
+  const id = item.ID || item.id;
+  try {
+    const res = await fetch('/api/board/'+id, {method:'DELETE'});
+    if (res.ok) { showSection('list'); fetchPosts(); }
+    else alert('삭제 실패');
+  } catch(e) { alert('삭제 실패'); }
+}
+
+/* ════════════════════════════════
+   첨부 / 미리보기 (게시글)
+════════════════════════════════ */
+function resetAttach() {
+  fileInput.value = ''; cameraInput.value = '';
+  composedFile = null; cameraMode = false;
+  overlayArea.style.display = 'none'; previewArea.innerHTML = '';
+  document.getElementById('overlayText').value = '';
+}
+
+function showFilePreview(file, area) {
+  area.innerHTML = '';
+  if (isImageFile(file)) {
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(file); area.appendChild(img);
+  } else {
+    const div = document.createElement('div');
+    div.className = 'file-badge';
+    div.textContent = '📎 ' + file.name + ' (' + fmtSize(file.size) + ')';
+    area.appendChild(div);
+  }
+}
+
+fileInput.addEventListener('change', () => {
+  const f = fileInput.files[0]; if (!f) return;
+  cameraMode = false; composedFile = null;
+  overlayArea.style.display = 'none'; cameraInput.value = '';
+  showFilePreview(f, previewArea);
+});
+
+cameraInput.addEventListener('change', () => {
+  const f = cameraInput.files[0]; if (!f) return;
+  cameraMode = true; composedFile = null;
+  fileInput.value = ''; overlayArea.style.display = '';
+  showFilePreview(f, previewArea);
+});
+
+/* ════════════════════════════════
+   캔버스 오버레이 합성
+════════════════════════════════ */
+async function buildComposedFile(sourceFile, titleVal, extraText) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(sourceFile);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width; canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+      const now = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      const dateStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      const lines = [dateStr];
+      if (titleVal)  lines.push(titleVal);
+      if (extraText) lines.push(extraText);
+      const fontSize   = Math.max(22, Math.floor(img.width/28));
+      const lineHeight = Math.round(fontSize*1.55);
+      const padding    = Math.round(fontSize*.7);
+      ctx.font      = `bold ${fontSize}px 'Malgun Gothic','Apple SD Gothic Neo',sans-serif`;
+      ctx.textAlign = 'left';
+      const maxW = Math.max(...lines.map(l=>ctx.measureText(l).width));
+      const boxH = lines.length*lineHeight+padding;
+      const boxX = padding/2;
+      const boxY = img.height-boxH-padding/2;
+      ctx.fillStyle = 'rgba(0,0,0,0.52)';
+      ctx.fillRect(boxX, boxY, maxW+padding, boxH);
+      ctx.fillStyle = '#ffffff';
+      lines.forEach((line,i) => {
+        ctx.fillText(line, boxX+padding/2, boxY+(i+1)*lineHeight-Math.round(fontSize*.15));
+      });
+      canvas.toBlob(blob => {
+        const name = sourceFile.name.replace(/\.[^.]+$/,'')+'_marked.jpg';
+        resolve(new File([blob], name, {type:'image/jpeg'}));
+      }, 'image/jpeg', 0.92);
+    };
+    img.src = url;
+  });
+}
+
+document.getElementById('applyOverlayBtn').addEventListener('click', async () => {
+  const f = cameraInput.files[0]; if (!f) return;
+  const btn = document.getElementById('applyOverlayBtn');
+  btn.disabled = true; btn.textContent = '처리 중...';
+  composedFile = await buildComposedFile(f, document.getElementById('fTitle').value.trim(), document.getElementById('overlayText').value.trim());
+  showFilePreview(composedFile, previewArea);
+  btn.disabled = false; btn.textContent = '미리보기 적용';
+});
+
+/* ════════════════════════════════
+   폼 제출 (게시글)
+════════════════════════════════ */
+postForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = '처리 중...';
+  try {
+    const fd = new FormData();
+    fd.append('title',   document.getElementById('fTitle').value);
+    fd.append('content', document.getElementById('fContent').value);
+    if (currentProjectId) fd.append('projectId', currentProjectId);
+    let fileToSend = composedFile || fileInput.files[0] || null;
+    if (cameraMode && cameraInput.files[0]) {
+      fileToSend = composedFile || await buildComposedFile(cameraInput.files[0], document.getElementById('fTitle').value.trim(), document.getElementById('overlayText').value.trim());
+    }
+    if (fileToSend) fd.append('image', fileToSend);
+    const url    = editingId ? '/api/board/'+editingId : '/api/board';
+    const method = editingId ? 'PUT' : 'POST';
+    const res    = await fetch(url, {method, body:fd});
+    if (res.ok) {
+      postForm.reset(); resetAttach(); editingId = null;
+      document.getElementById('formTitle').textContent = '글쓰기';
+      showSection('list'); fetchPosts();
+    } else {
+      const err = await res.json().catch(()=>null);
+      alert(err?.error || '요청 실패');
+    }
+  } catch(e) { console.error(e); alert('요청 실패'); }
+  finally { btn.disabled = false; btn.textContent = '등록'; }
+});
+
+/* ════════════════════════════════
+   이벤트 바인딩
+════════════════════════════════ */
+document.getElementById('refreshBtn').addEventListener('click', () => {
+  if (currentProjectId) { showSection('list'); fetchPosts(); }
+  else loadDashboard();
+});
+document.getElementById('listBtn').addEventListener('click', () => {
+  currentProjectId ? showSection('list') : loadDashboard();
+});
+document.getElementById('newBtn').addEventListener('click', () => {
+  editingId = null; postForm.reset(); resetAttach();
+  document.getElementById('formTitle').textContent = '글쓰기';
+  showSection('form');
+});
+document.getElementById('backBtn').addEventListener('click',     () => showSection('list'));
+document.getElementById('formListBtn').addEventListener('click', () => { editingId=null; showSection('list'); });
+document.getElementById('cancelBtn').addEventListener('click',   () => { editingId=null; showSection('list'); });
+document.getElementById('detailEditBtn').addEventListener('click', () => { if(currentPost) openEdit(currentPost); });
+document.getElementById('detailDelBtn').addEventListener('click',  () => { if(currentPost) removePost(currentPost); });
+
+/* ════════════════════════════════
+   댓글 시스템
+════════════════════════════════ */
+let commentComposedFile = null;
+let commentCameraMode   = false;
+const cFileInput    = document.getElementById('cFileInput');
+const cCameraInput  = document.getElementById('cCameraInput');
+const cPreviewArea  = document.getElementById('cPreviewArea');
+const cOverlayArea  = document.getElementById('cOverlayArea');
+
+function resetCommentForm() {
+  document.getElementById('cContent').value = '';
+  cFileInput.value = ''; cCameraInput.value = '';
+  commentComposedFile = null; commentCameraMode = false;
+  cOverlayArea.style.display = 'none'; cPreviewArea.innerHTML = '';
+  document.getElementById('cOverlayText').value = '';
+}
+
+cFileInput.addEventListener('change', () => {
+  const f = cFileInput.files[0]; if (!f) return;
+  commentCameraMode = false; commentComposedFile = null;
+  cOverlayArea.style.display = 'none'; cCameraInput.value = '';
+  showFilePreview(f, cPreviewArea);
+});
+
+cCameraInput.addEventListener('change', () => {
+  const f = cCameraInput.files[0]; if (!f) return;
+  commentCameraMode = true; commentComposedFile = null;
+  cFileInput.value = ''; cOverlayArea.style.display = '';
+  showFilePreview(f, cPreviewArea);
+});
+
+document.getElementById('cApplyOverlayBtn').addEventListener('click', async () => {
+  const f = cCameraInput.files[0]; if (!f) return;
+  const btn = document.getElementById('cApplyOverlayBtn');
+  btn.disabled = true; btn.textContent = '처리 중...';
+  commentComposedFile = await buildComposedFile(f, currentUser?.name || '', document.getElementById('cOverlayText').value.trim());
+  showFilePreview(commentComposedFile, cPreviewArea);
+  btn.disabled = false; btn.textContent = '미리보기 적용';
+});
+
+async function loadComments(postId) {
+  const list = document.getElementById('commentsList');
+  const countEl = document.getElementById('commentCount');
+  list.innerHTML = '<div style="padding:16px;color:var(--g400);font-size:.85rem;">불러오는 중...</div>';
+  try {
+    const r = await fetch('/api/board/'+postId+'/comments');
+    const comments = await r.json();
+    countEl.textContent = comments.length || '';
+    if (!comments.length) {
+      list.innerHTML = '<div style="padding:16px;color:var(--g400);font-size:.85rem;">등록된 의견이 없습니다.</div>';
+      return;
+    }
+    list.innerHTML = '';
+    comments.forEach(c => {
+      const item = document.createElement('div');
+      item.className = 'comment-item';
+      const postTitle = currentPost?.TITLE || '';
+      const tag = document.createElement('div');
+      tag.className = 'comment-author-row';
+      const authorTag = document.createElement('span');
+      authorTag.className = 'comment-author-tag';
+      authorTag.textContent = `[추가의견] ${c.AUTHOR_NAME}`;
+      if (postTitle) {
+        const sub = document.createElement('span');
+        sub.style.cssText = 'font-size:.75rem;color:var(--g500);margin-left:6px;font-weight:400;';
+        sub.textContent = `[${postTitle}]`;
+        authorTag.appendChild(sub);
+      }
+      const dateSpan = document.createElement('span');
+      dateSpan.className = 'comment-date';
+      dateSpan.textContent = c.CREATED_AT || '';
+      const rightWrap = document.createElement('div');
+      rightWrap.style.cssText = 'display:flex;align-items:center;gap:8px;';
+      rightWrap.appendChild(dateSpan);
+      const canDelete = currentUser && (currentUser.role === 'ADMIN' || currentUser.id === c.AUTHOR_ID);
+      if (canDelete) {
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn btn-danger btn-sm';
+        delBtn.style.height = '26px'; delBtn.style.padding = '0 10px';
+        delBtn.textContent = '삭제';
+        delBtn.onclick = () => deleteComment(postId, c.COMMENT_ID);
+        rightWrap.appendChild(delBtn);
+      }
+      tag.appendChild(authorTag); tag.appendChild(rightWrap);
+      item.appendChild(tag);
+
+      if (c.IMAGE_PATH) {
+        if (isImageUrl(c.IMAGE_PATH)) {
+          const img = document.createElement('img');
+          img.src = c.IMAGE_PATH; img.className = 'comment-img';
+          item.appendChild(img);
+        } else {
+          const a = document.createElement('a');
+          a.href = c.IMAGE_PATH; a.target = '_blank';
+          a.className = 'comment-file';
+          a.textContent = '📎 ' + fileName(c.IMAGE_PATH);
+          item.appendChild(a);
+        }
+      }
+      if (c.CONTENT) {
+        const body = document.createElement('div');
+        body.className = 'comment-content';
+        body.textContent = c.CONTENT;
+        item.appendChild(body);
+      }
+      list.appendChild(item);
+    });
+  } catch(e) {
+    list.innerHTML = '<div style="padding:16px;color:var(--danger);font-size:.85rem;">조회 실패</div>';
+  }
+}
+
+async function deleteComment(postId, cid) {
+  if (!confirm('댓글을 삭제하시겠습니까?')) return;
+  try {
+    const r = await fetch(`/api/board/${postId}/comments/${cid}`, {method:'DELETE'});
+    if (r.ok) loadComments(postId);
+    else alert('삭제 실패');
+  } catch(e) { alert('오류 발생'); }
+}
+
+async function submitComment() {
+  const content = document.getElementById('cContent').value.trim();
+  const postId  = currentPost?.ID || currentPost?.id;
+  if (!postId) return;
+  const btn = document.getElementById('cSubmitBtn');
+  btn.disabled = true; btn.textContent = '처리 중...';
+  try {
+    const fd = new FormData();
+    fd.append('content', content);
+    let fileToSend = commentComposedFile || cFileInput.files[0] || null;
+    if (commentCameraMode && cCameraInput.files[0]) {
+      fileToSend = commentComposedFile || await buildComposedFile(cCameraInput.files[0], currentUser?.name || '', document.getElementById('cOverlayText').value.trim());
+    }
+    if (fileToSend) fd.append('image', fileToSend);
+    const r = await fetch('/api/board/'+postId+'/comments', {method:'POST', body:fd});
+    if (r.ok) { resetCommentForm(); loadComments(postId); }
+    else { const d = await r.json().catch(()=>null); alert(d?.error || '등록 실패'); }
+  } catch(e) { alert('오류 발생'); }
+  finally { btn.disabled = false; btn.textContent = '의견 등록'; }
+}
+
+/* ════════════════════════════════
+   인원관리
+════════════════════════════════ */
+const ROLE_LABELS = {
+  ADMIN:'전체관리자(ADMIN)', PM:'사업총괄(PM)', CM:'건설사업관리자(CM)',
+  SA:'현장행정/공무(SA)', RE:'감리원(RE)', SE:'현장시공기술자(SE)',
+  QC:'품질관리자(QC)', FM:'작업반장(FM)', PENDING:'미승인',
+};
+
+async function openMgmt() {
+  showSection('mgmt');
+  document.getElementById('userDetailWrap').style.display = 'none';
+  document.getElementById('userListWrap').style.display = '';
+  await loadUserList();
+}
+
+async function loadUserList() {
+  const wrap = document.getElementById('userTableWrap');
+  wrap.innerHTML = '<div style="padding:16px;color:var(--g400);">불러오는 중...</div>';
+  try {
+    const r = await fetch('/api/users');
+    if (!r.ok) { wrap.innerHTML = '<div style="padding:16px;color:var(--danger);">조회 실패</div>'; return; }
+    const users = await r.json();
+    if (!users.length) { wrap.innerHTML = '<div style="padding:16px;color:var(--g400);">등록된 사용자가 없습니다.</div>'; return; }
+    let html = `<table class="user-table"><thead><tr>
+      <th>이름</th><th>아이디</th><th>역할</th><th>상태</th><th>가입일</th>
+    </tr></thead><tbody>`;
+    users.forEach(u => {
+      const isPending = u.STATUS === 'PENDING';
+      const badge = isPending
+        ? '<span class="badge pending">미승인</span>'
+        : u.STATUS==='ACTIVE'
+          ? '<span class="badge active">활성</span>'
+          : '<span class="badge inactive">비활성</span>';
+      html += `<tr class="${isPending?'row-pending':''}">
+        <td><span class="name-link" onclick="openUserDetail('${u.USER_ID}')">${u.USER_NAME}</span></td>
+        <td style="font-size:.82rem;color:var(--g500);">${u.USER_ID}</td>
+        <td style="font-size:.82rem;">${ROLE_LABELS[u.ROLE]||u.ROLE}</td>
+        <td>${badge}</td>
+        <td style="font-size:.78rem;color:var(--g400);">${u.CREATED_AT||''}</td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
+  } catch(e) { wrap.innerHTML = '<div style="padding:16px;color:var(--danger);">오류 발생</div>'; }
+}
+
+let currentUid = null;
+let pwRevealed = false;
+
+async function openUserDetail(uid) {
+  currentUid = uid; pwRevealed = false;
+  document.getElementById('udPw').textContent = '••••••••••';
+  document.getElementById('eyeBtn').textContent = '👁 보기';
+  document.getElementById('udSaveMsg').textContent = '';
+  document.getElementById('udSaveMsg').className = 'msg';
+  try {
+    const r = await fetch('/api/users/'+uid);
+    if (!r.ok) { alert('조회 실패'); return; }
+    const u = await r.json();
+    document.getElementById('udName').textContent    = u.USER_NAME;
+    document.getElementById('udId').textContent      = u.USER_ID;
+    document.getElementById('udSocial').textContent  = u.SOCIAL_PROVIDER ? `${u.SOCIAL_PROVIDER} (${u.SOCIAL_KEY||''})` : '없음';
+    document.getElementById('udCreated').textContent = u.CREATED_AT || '';
+    const roleSelect = document.getElementById('udRoleSelect');
+    roleSelect.innerHTML = '';
+    Object.entries(ROLE_LABELS).forEach(([k,v]) => {
+      const opt = document.createElement('option');
+      opt.value = k; opt.textContent = v;
+      if (k===u.ROLE) opt.selected = true;
+      roleSelect.appendChild(opt);
+    });
+    document.getElementById('udStatusSelect').value = u.STATUS || 'PENDING';
+    const isAdmin = currentUser && currentUser.role === 'ADMIN';
+    document.getElementById('udSaveBtn').style.display  = isAdmin ? '' : 'none';
+    roleSelect.disabled = !isAdmin;
+    document.getElementById('udStatusSelect').disabled = !isAdmin;
+    if (isAdmin) {
+      document.getElementById('udProjectsRow').style.display = '';
+      loadUserProjects(uid);
+    } else {
+      document.getElementById('udProjectsRow').style.display = 'none';
+    }
+    document.getElementById('userListWrap').style.display   = 'none';
+    document.getElementById('userDetailWrap').style.display = '';
+  } catch(e) { alert('오류 발생'); }
+}
+
+function closeUserDetail() {
+  document.getElementById('userDetailWrap').style.display = 'none';
+  document.getElementById('userListWrap').style.display   = '';
+}
+
+async function togglePw() {
+  if (!currentUser || currentUser.role !== 'ADMIN') { alert('ADMIN만 확인 가능합니다.'); return; }
+  if (!pwRevealed) {
+    try {
+      const r = await fetch('/api/users/'+currentUid+'/pw');
+      const d = await r.json();
+      document.getElementById('udPw').textContent  = d.pw || '(확인 불가)';
+      document.getElementById('eyeBtn').textContent = '🙈 숨기기';
+      pwRevealed = true;
+    } catch(e) { alert('조회 실패'); }
+  } else {
+    document.getElementById('udPw').textContent  = '••••••••••';
+    document.getElementById('eyeBtn').textContent = '👁 보기';
+    pwRevealed = false;
+  }
+}
+
+async function saveUserDetail() {
+  const role   = document.getElementById('udRoleSelect').value;
+  const status = document.getElementById('udStatusSelect').value;
+  const msgEl  = document.getElementById('udSaveMsg');
+  const btn    = document.getElementById('udSaveBtn');
+  btn.disabled = true; btn.textContent = '저장 중...';
+  try {
+    const r = await fetch('/api/users/'+currentUid, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({role, status}),
+    });
+    const d = await r.json();
+    if (r.ok) {
+      msgEl.textContent = '저장되었습니다.'; msgEl.className = 'msg ok';
+      await loadUserList(); checkPending();
+    } else {
+      msgEl.textContent = d.error || '저장 실패'; msgEl.className = 'msg err';
+    }
+  } catch(e) { msgEl.textContent = '오류 발생'; msgEl.className = 'msg err'; }
+  finally { btn.disabled = false; btn.textContent = '저장'; }
+}
+
+async function loadUserProjects(uid) {
+  const wrap = document.getElementById('udProjects');
+  wrap.innerHTML = '<div style="color:var(--g400);font-size:.85rem;padding:4px 0;">불러오는 중...</div>';
+  try {
+    const r = await fetch('/api/users/'+uid+'/projects');
+    if (!r.ok) { wrap.innerHTML = '<div style="color:var(--danger);font-size:.85rem;">조회 실패</div>'; return; }
+    const projects = await r.json();
+    if (!projects.length) {
+      wrap.innerHTML = '<div style="color:var(--g400);font-size:.85rem;padding:4px 0;">등록된 프로젝트가 없습니다.</div>';
+      return;
+    }
+    wrap.innerHTML = '';
+    projects.forEach(p => {
+      const row = document.createElement('div');
+      row.className = 'member-row';
+      const left = document.createElement('span');
+      const nameEl = document.createElement('span');
+      nameEl.textContent = p.PROJECT_NAME;
+      nameEl.style.fontSize = '.875rem';
+      const badge = document.createElement('span');
+      badge.className = 'badge ' + (p.IS_MEMBER ? 'active' : 'inactive');
+      badge.style.cssText = 'margin-left:8px;font-size:.72rem;';
+      badge.textContent = p.IS_MEMBER ? '참여중' : '미배정';
+      left.appendChild(nameEl); left.appendChild(badge);
+      const btn = document.createElement('button');
+      btn.style.cssText = 'padding:0 12px;height:30px;font-size:.8rem;';
+      if (p.IS_MEMBER) {
+        btn.className = 'btn btn-danger btn-sm'; btn.textContent = '제거';
+        btn.onclick = async () => {
+          btn.disabled = true;
+          const res = await fetch(`/api/projects/${p.PROJECT_ID}/members/${uid}`, {method:'DELETE'});
+          if (res.ok) loadUserProjects(uid);
+          else { alert('제거 실패'); btn.disabled = false; }
+        };
+      } else {
+        btn.className = 'btn btn-accent btn-sm'; btn.textContent = '배정';
+        btn.onclick = async () => {
+          btn.disabled = true;
+          const res = await fetch(`/api/projects/${p.PROJECT_ID}/members`, {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({userId:uid}),
+          });
+          if (res.ok) loadUserProjects(uid);
+          else { const d = await res.json().catch(()=>null); alert(d?.error||'배정 실패'); btn.disabled = false; }
+        };
+      }
+      row.appendChild(left); row.appendChild(btn);
+      wrap.appendChild(row);
+    });
+  } catch(e) { wrap.innerHTML = '<div style="color:var(--danger);font-size:.85rem;">오류 발생</div>'; }
+}
+
+/* ════════════════════════════════
+   대시보드
+════════════════════════════════ */
+let currentProjectId   = null;
+let currentProjectName = '';
+
+async function loadDashboard() {
+  showSection('dash');
+  const grid = document.getElementById('projGrid');
+  grid.innerHTML = '<div style="padding:24px;color:var(--g400);text-align:center;">불러오는 중...</div>';
+  try {
+    const r = await fetch('/api/projects');
+    const projects = await r.json();
+    if (!projects.length) {
+      grid.innerHTML = '<div style="padding:24px;color:var(--g400);text-align:center;">참여 중인 프로젝트가 없습니다.</div>';
+      return;
+    }
+    grid.innerHTML = '';
+    projects.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'proj-card';
+      card.innerHTML = `
+        <div class="proj-card-hd">
+          <div class="proj-card-name">${p.PROJECT_NAME}</div>
+          <div class="proj-card-code">${p.PROJECT_CODE||''}</div>
+        </div>
+        <div class="proj-card-body">
+          <div class="proj-card-desc">${p.DESCRIPTION||'설명 없음'}</div>
+          <div class="proj-card-stats">
+            <span>📋 <strong>${p.POST_COUNT}</strong>건</span>
+            <span>👥 <strong>${p.MEMBER_COUNT}</strong>명</span>
+          </div>
+        </div>`;
+      card.onclick = () => enterProject(p.PROJECT_ID, p.PROJECT_NAME);
+      if (currentUser && currentUser.role === 'ADMIN') {
+        const ft = document.createElement('div');
+        ft.className = 'proj-card-ft';
+        const settingsBtn = document.createElement('button');
+        settingsBtn.className = 'btn-proj-settings';
+        settingsBtn.textContent = '⚙ 설정';
+        settingsBtn.onclick = e => { e.stopPropagation(); openProjectSettings(p); };
+        ft.appendChild(settingsBtn);
+        card.appendChild(ft);
+      }
+      grid.appendChild(card);
+    });
+  } catch(e) { grid.innerHTML = '<div style="padding:24px;color:var(--danger);">오류 발생</div>'; }
+}
+
+function enterProject(pid, pname) {
+  currentProjectId   = pid;
+  currentProjectName = pname;
+  document.getElementById('hdProjName').textContent = pname;
+  document.getElementById('hdProjName').style.display = '';
+  document.getElementById('listProjName').textContent = pname;
+  document.getElementById('newBtn').style.display = '';
+  showSection('list');
+  fetchPosts();
+}
+
+function goBackToDashboard() {
+  currentProjectId   = null;
+  currentProjectName = '';
+  document.getElementById('hdProjName').style.display = 'none';
+  document.getElementById('newBtn').style.display = 'none';
+  loadDashboard();
+}
+
+/* ════════════════════════════════
+   프로젝트 생성 모달
+════════════════════════════════ */
+function openNewProjectModal() {
+  document.getElementById('projName').value = '';
+  document.getElementById('projCode').value = '';
+  document.getElementById('projDesc').value = '';
+  document.getElementById('projModalErr').textContent = '';
+  document.getElementById('projModal').classList.add('show');
+}
+function closeProjModal() { document.getElementById('projModal').classList.remove('show'); }
+
+async function createProject() {
+  const name = document.getElementById('projName').value.trim();
+  const code = document.getElementById('projCode').value.trim();
+  const desc = document.getElementById('projDesc').value.trim();
+  const errEl = document.getElementById('projModalErr');
+  if (!name) { errEl.textContent = '프로젝트명을 입력하세요.'; errEl.className='modal-msg err'; return; }
+  try {
+    const r = await fetch('/api/projects', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({projectName:name, projectCode:code, description:desc}),
+    });
+    const d = await r.json();
+    if (r.ok) { closeProjModal(); loadDashboard(); }
+    else { errEl.textContent = d.error||'생성 실패'; errEl.className='modal-msg err'; }
+  } catch(e) { errEl.textContent = '오류 발생'; errEl.className='modal-msg err'; }
+}
+
+/* ════════════════════════════════
+   프로젝트 설정 (ADMIN)
+════════════════════════════════ */
+let currentSettingsProjectId = null;
+
+async function openProjectSettings(p) {
+  currentSettingsProjectId = p.PROJECT_ID;
+  document.getElementById('psModalTitle').textContent = `프로젝트 설정: ${p.PROJECT_NAME}`;
+  document.getElementById('psName').value = p.PROJECT_NAME || '';
+  document.getElementById('psDesc').value = p.DESCRIPTION  || '';
+  document.getElementById('psInfoMsg').textContent = '';
+  document.getElementById('psMemberErr').textContent = '';
+  document.getElementById('projSettingsModal').classList.add('show');
+  await Promise.all([loadProjectMembers(p.PROJECT_ID), loadAvailableUsers(p.PROJECT_ID)]);
+}
+
+function closeProjSettings() { document.getElementById('projSettingsModal').classList.remove('show'); }
+
+async function saveProjectSettings() {
+  const name  = document.getElementById('psName').value.trim();
+  const desc  = document.getElementById('psDesc').value.trim();
+  const msgEl = document.getElementById('psInfoMsg');
+  if (!name) { msgEl.textContent = '프로젝트명을 입력하세요.'; msgEl.className='modal-msg err'; return; }
+  try {
+    const r = await fetch('/api/projects/'+currentSettingsProjectId, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({projectName:name, description:desc}),
+    });
+    const d = await r.json();
+    if (r.ok) { msgEl.textContent='저장되었습니다.'; msgEl.className='modal-msg ok'; loadDashboard(); }
+    else { msgEl.textContent=d.error||'저장 실패'; msgEl.className='modal-msg err'; }
+  } catch(e) { msgEl.textContent='오류 발생'; msgEl.className='modal-msg err'; }
+}
+
+async function loadProjectMembers(pid) {
+  const wrap = document.getElementById('psMemberList');
+  wrap.innerHTML = '<div style="color:var(--g400);font-size:.85rem;padding:6px 0;">불러오는 중...</div>';
+  try {
+    const r = await fetch('/api/projects/'+pid+'/members');
+    if (!r.ok) { wrap.innerHTML = '<div style="color:var(--danger);font-size:.85rem;">조회 실패</div>'; return; }
+    const members = await r.json();
+    if (!members.length) { wrap.innerHTML = '<div style="color:var(--g400);font-size:.85rem;padding:6px 0;">멤버가 없습니다.</div>'; return; }
+    wrap.innerHTML = '';
+    members.forEach(m => {
+      const row = document.createElement('div');
+      row.className = 'member-row';
+      const info = document.createElement('span');
+      const strong = document.createElement('strong');
+      strong.textContent = m.USER_NAME;
+      const sub = document.createElement('span');
+      sub.style.cssText = 'color:var(--g500);font-size:.8rem;margin-left:5px;';
+      sub.textContent = m.USER_ID;
+      info.appendChild(strong); info.appendChild(sub);
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn btn-danger btn-sm';
+      delBtn.style.cssText = 'height:28px;padding:0 10px;font-size:.78rem;';
+      delBtn.textContent = '제거';
+      delBtn.onclick = () => removeProjectMember(pid, m.USER_ID);
+      row.appendChild(info); row.appendChild(delBtn);
+      wrap.appendChild(row);
+    });
+  } catch(e) { wrap.innerHTML = '<div style="color:var(--danger);font-size:.85rem;">오류 발생</div>'; }
+}
+
+async function loadAvailableUsers(pid) {
+  const sel = document.getElementById('psUserSelect');
+  sel.innerHTML = '<option value="">-- 멤버 추가 선택 --</option>';
+  try {
+    const [members, users] = await Promise.all([
+      fetch('/api/projects/'+pid+'/members').then(r=>r.json()),
+      fetch('/api/users').then(r=>r.json()),
+    ]);
+    const memberIds = new Set(members.map(m=>m.USER_ID));
+    users.filter(u=>u.STATUS==='ACTIVE'&&!memberIds.has(u.USER_ID)).forEach(u=>{
+      const opt = document.createElement('option');
+      opt.value = u.USER_ID; opt.textContent = `${u.USER_NAME} (${u.USER_ID})`;
+      sel.appendChild(opt);
+    });
+  } catch(e) {}
+}
+
+async function addProjectMember() {
+  const userId = document.getElementById('psUserSelect').value;
+  const errEl  = document.getElementById('psMemberErr');
+  if (!userId) { errEl.textContent='추가할 사용자를 선택하세요.'; errEl.className='modal-msg err'; return; }
+  try {
+    const r = await fetch('/api/projects/'+currentSettingsProjectId+'/members', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({userId}),
+    });
+    const d = await r.json();
+    if (r.ok) {
+      errEl.textContent=''; errEl.className='modal-msg';
+      await Promise.all([loadProjectMembers(currentSettingsProjectId), loadAvailableUsers(currentSettingsProjectId)]);
+    } else { errEl.textContent=d.error||'추가 실패'; errEl.className='modal-msg err'; }
+  } catch(e) { errEl.textContent='오류 발생'; errEl.className='modal-msg err'; }
+}
+
+async function removeProjectMember(pid, userId) {
+  if (!confirm('멤버를 제거하시겠습니까?')) return;
+  try {
+    const r = await fetch('/api/projects/'+pid+'/members/'+userId, {method:'DELETE'});
+    if (r.ok) { await Promise.all([loadProjectMembers(pid), loadAvailableUsers(pid)]); }
+    else alert('제거 실패');
+  } catch(e) { alert('오류 발생'); }
+}
+
+/* ════════════════════════════════
+   시작
+════════════════════════════════ */
+initAuth().then(() => loadDashboard());
+
+/* ════════════════════════════════
+   SPA 뒤로가기 / 이탈 확인
+════════════════════════════════ */
+window.addEventListener('popstate', e => {
+  if (!e.state || !e.state.section) {
+    history.pushState(_currentNavState, '', '/');
+    document.getElementById('exitModal').style.display = 'flex';
+    return;
+  }
+  const state = e.state;
+  _currentNavState = state;
+  _suppressHistoryPush = true;
+
+  if (state.section === 'dash') {
+    currentProjectId = null;
+    currentProjectName = '';
+    document.getElementById('hdProjName').style.display = 'none';
+    document.getElementById('newBtn').style.display = 'none';
+    loadDashboard();
+  } else if (state.section === 'list') {
+    currentProjectId   = state.projectId   || null;
+    currentProjectName = state.projectName || '';
+    if (currentProjectId) {
+      document.getElementById('hdProjName').textContent = currentProjectName;
+      document.getElementById('hdProjName').style.display = '';
+      document.getElementById('newBtn').style.display = '';
+      document.getElementById('listProjName').textContent = currentProjectName;
+    }
+    showSection('list');
+    fetchPosts();
+  } else if (state.section === 'detail') {
+    if (currentPost) { openDetail(currentPost); }
+    else { showSection('list'); fetchPosts(); }
+  } else if (state.section === 'mgmt') {
+    showSection('mgmt');
+  } else {
+    loadDashboard();
+  }
+
+  _suppressHistoryPush = false;
+});
+
+function confirmExit() {
+  document.getElementById('exitModal').style.display = 'none';
+  window.location.href = '/login';
+}
+function cancelExit() {
+  document.getElementById('exitModal').style.display = 'none';
+}
+
+</script>
+
+<!-- 이탈 확인 모달 -->
+<div id="exitModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;padding:32px 28px;max-width:300px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.25);">
+    <div style="font-size:1.05rem;font-weight:700;color:#1e3a5f;margin-bottom:10px;">시스템 나가기</div>
+    <div style="color:#6b7280;font-size:.93rem;margin-bottom:24px;line-height:1.5;">시스템을 나가시겠습니까?</div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="confirmExit()" style="flex:1;padding:10px;background:#ef4444;color:#fff;border:0;border-radius:8px;font:inherit;font-size:.95rem;font-weight:700;cursor:pointer;">예</button>
+      <button onclick="cancelExit()" style="flex:1;padding:10px;background:#1e3a5f;color:#fff;border:0;border-radius:8px;font:inherit;font-size:.95rem;font-weight:700;cursor:pointer;">아니오</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

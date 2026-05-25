@@ -1,20 +1,20 @@
 {
   "name": "csm",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Dragom Construction Site ERP",
+  "main": "app.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node app.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1048.0",
-    "@supabase/supabase-js": "^2.106.0",
-    "dotenv": "^17.4.2",
-    "exceljs": "^4.4.0",
+    "@aws-sdk/client-s3": "^3.800.0",
+    "connect-pg-simple": "^10.0.0",
     "express": "^5.2.1",
-    "multer": "^2.1.1"
+    "express-session": "^1.19.0",
+    "multer": "^2.1.1",
+    "pg": "^8.13.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

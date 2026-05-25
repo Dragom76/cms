@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>Dragom - 로그인</title>
+	<style>
+		:root { --primary:#003087; --primary-h:#003FA8; --primary-l:#E6EEFF;
+		        --cta:#FF6600; --danger:#CC0A1E; --success:#00854A; }
+		* { box-sizing:border-box; margin:0; padding:0; }
+		body { font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',system-ui,-apple-system,sans-serif;
+		       background:#EEF2F8; color:#17273C;
+		       display:flex; flex-direction:column; align-items:center; justify-content:center;
+		       min-height:100vh; padding:20px; }
+
+		/* 로고 상단 */
+		.login-brand { text-align:center; margin-bottom:24px; }
+		.login-brand img { width:52px; height:52px; object-fit:contain; border-radius:8px;
+		                    display:block; margin:0 auto 8px; }
+		.login-brand-name { font-size:1.4rem; font-weight:900; color:var(--primary); letter-spacing:-.5px; }
+		.login-brand-sub { font-size:.8rem; color:#5A7490; margin-top:2px; }
+
+		.card { background:#fff; border-radius:8px;
+		        box-shadow:0 4px 24px rgba(0,48,135,.10);
+		        padding:32px 30px; width:100%; max-width:420px;
+		        border-top:4px solid var(--primary); }
+
+		/* 탭 */
+		.tabs { display:flex; border-bottom:2px solid #EEF2F8; margin-bottom:22px; }
+		.tab  { flex:1; text-align:center; padding:11px 0; cursor:pointer; font-size:.95rem;
+		         color:#7F98B4; border-bottom:3px solid transparent; margin-bottom:-2px;
+		         transition:color .15s, border-color .15s; font-weight:600; }
+		.tab.active { color:var(--primary); border-color:var(--primary); font-weight:800; }
+
+		/* 폼 */
+		.section { display:none; }
+		.section.active { display:block; }
+		.field { margin-bottom:14px; }
+		.field label { display:block; font-size:.82rem; color:#3D5570; margin-bottom:5px; font-weight:700; }
+		.field input { width:100%; padding:10px 12px; border:1px solid #D8E2EE; border-radius:4px;
+		                font:inherit; font-size:.92rem; outline:none; transition:border-color .15s;
+		                color:#17273C; }
+		.field input:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(0,48,135,.08); }
+		.field input.err { border-color:var(--danger); }
+		.msg { font-size:.78rem; margin-top:4px; }
+		.msg.err  { color:var(--danger); }
+		.msg.ok   { color:var(--success); }
+
+		/* 버튼 */
+		.btn-main { width:100%; padding:12px; background:var(--primary); color:#fff; border:0;
+		             border-radius:4px; font:inherit; font-size:.97rem; font-weight:800;
+		             cursor:pointer; margin-top:6px; transition:background .15s;
+		             letter-spacing:-.2px; }
+		.btn-main:hover { background:var(--primary-h); }
+		.btn-main:disabled { opacity:.5; cursor:not-allowed; }
+
+		/* 소셜 */
+		.social-title { text-align:center; font-size:.78rem; color:#B5C5D8; margin:20px 0 12px;
+		                 position:relative; }
+		.social-title::before,.social-title::after { content:''; position:absolute; top:50%;
+		  width:36%; height:1px; background:#D8E2EE; }
+		.social-title::before { left:0; }
+		.social-title::after  { right:0; }
+		.social-btns { display:flex; gap:10px; justify-content:center; }
+		.s-btn { flex:1; display:flex; align-items:center; justify-content:center; gap:7px;
+		          padding:10px 6px; border-radius:4px; border:1px solid #D8E2EE; cursor:pointer;
+		          font:inherit; font-size:.85rem; font-weight:700; transition:opacity .15s; }
+		.s-btn:hover { opacity:.82; }
+		.s-btn.google { background:#fff;    color:#3c4043; border-color:#D8E2EE; }
+		.s-btn.kakao  { background:#FEE500; color:#3C1E1E; border:0; }
+		.s-btn.naver  { background:#03C75A; color:#fff;    border:0; }
+
+		/* 소셜 인증 상태 표시 */
+		.social-verified { display:none; align-items:center; gap:8px; padding:8px 12px;
+		                    background:var(--primary-l); border:1px solid rgba(0,48,135,.2);
+		                    border-radius:4px; font-size:.83rem; color:var(--primary); margin-top:8px; }
+		.social-verified.show { display:flex; }
+
+		/* 승인 대기 안내 */
+		.pending-box { background:#FFF8E1; border:1px solid #FFD84D; border-radius:4px;
+		                padding:16px; text-align:center; font-size:.9rem; color:#7A5800; display:none; }
+		.pending-box.show { display:block; }
+
+		/* 비밀번호 조건 체크리스트 */
+		.pw-checklist { display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; }
+		.pw-item { display:inline-flex; align-items:center; gap:3px; font-size:.75rem;
+		            font-weight:600; color:var(--danger); background:#FDEAED;
+		            border:1px solid #F5B8BF; border-radius:3px; padding:3px 8px;
+		            transition:color .18s, background .18s, border-color .18s; }
+		.pw-item.ok { color:var(--success); background:#E6F4EE; border-color:#A8DAC0; }
+		.pw-mark { font-size:.85rem; font-weight:900; min-width:.9em; text-align:center; }
+	</style>
+</head>
+<body>
+<div class="login-brand">
+	<img src="/logo.png" alt="Dragom">
+	<div class="login-brand-name">Dragom</div>
+	<div class="login-brand-sub">건설현장 ERP 시스템</div>
+</div>
+<div class="card">
+
+	<div class="tabs">
+		<div class="tab active" id="tabLogin" onclick="switchTab('login')">로그인</div>
+		<div class="tab" id="tabReg" onclick="switchTab('reg')">회원가입</div>
+	</div>
+
+	<!-- ── 로그인 탭 ── -->
+	<div class="section active" id="secLogin">
+		<div id="pendingBox" class="pending-box">
+			관리자 승인 대기 중입니다.<br>승인 후 로그인 가능합니다.
+		</div>
+		<div class="field">
+			<label>아이디</label>
+			<input type="text" id="lId" autocomplete="username" placeholder="아이디 입력">
+		</div>
+		<div class="field">
+			<label>비밀번호</label>
+			<input type="password" id="lPw" autocomplete="current-password" placeholder="비밀번호 입력">
+		</div>
+		<div class="msg err" id="lErr"></div>
+		<button class="btn-main" id="loginBtn" onclick="doLogin()">로그인</button>
+
+		<div class="social-title">소셜 로그인</div>
+		<div class="social-btns">
+			<button class="s-btn google" onclick="socialLogin('google')">
+				<svg width="17" height="17" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.4 1.2 8.7 3.2l6.5-6.5C35.3 2.7 30 .5 24 .5 14.7.5 6.8 5.9 3 13.7l7.6 5.9C12.4 13.8 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 7.1-9.9 7.1-17z"/><path fill="#FBBC05" d="M10.6 28.4A14.5 14.5 0 0 1 9.5 24c0-1.5.3-3 .7-4.4L2.6 13.7A23.5 23.5 0 0 0 .5 24c0 3.8.9 7.3 2.5 10.5l7.6-6.1z"/><path fill="#34A853" d="M24 47.5c6 0 11-2 14.7-5.3l-7.5-5.8c-2 1.4-4.6 2.1-7.2 2.1-6.3 0-11.6-4.3-13.5-10l-7.6 6c3.8 7.6 11.6 13 21.1 13z"/></svg>
+				구글
+			</button>
+			<button class="s-btn kakao" onclick="socialLogin('kakao')">
+				<svg width="17" height="17" viewBox="0 0 24 24"><path fill="#3C1E1E" d="M12 3C6.48 3 2 6.48 2 10.8c0 2.7 1.66 5.07 4.16 6.47L5.1 21l4.57-2.73c.75.12 1.53.18 2.33.18 5.52 0 10-3.48 10-7.65S17.52 3 12 3z"/></svg>
+				카카오
+			</button>
+			<button class="s-btn naver" onclick="socialLogin('naver')">
+				<svg width="17" height="17" viewBox="0 0 24 24"><path fill="#fff" d="M13.65 12.27L10.04 6H6v12h4.35V11.73L13.96 18H18V6h-4.35z"/></svg>
+				네이버
+			</button>
+		</div>
+	</div>
+
+	<!-- ── 회원가입 탭 ── -->
+	<div class="section" id="secReg">
+		<div id="regSuccess" style="display:none; text-align:center; padding:20px 0;">
+			<div style="font-size:2rem; color:#22c55e; margin-bottom:10px;">✓</div>
+			<div style="font-weight:700; margin-bottom:8px;">회원가입 신청이 완료되었습니다.</div>
+			<div style="font-size:.88rem; color:#6b7280;">관리자 승인 후 로그인 가능합니다.</div>
+			<button class="btn-main" style="margin-top:16px;" onclick="switchTab('login')">로그인으로 이동</button>
+		</div>
+		<div id="regForm">
+			<div class="field">
+				<label>아이디 <span style="font-weight:400;color:#9ca3af">(영어소문자·숫자·특수문자 6~20자)</span></label>
+				<input type="text" id="rId" autocomplete="off" placeholder="예: hong123"
+				       oninput="validateId()">
+				<div class="msg" id="rIdMsg"></div>
+			</div>
+			<div class="field">
+				<label>비밀번호</label>
+				<input type="password" id="rPw" autocomplete="new-password" placeholder="비밀번호 입력"
+				       oninput="validatePw()">
+				<div class="pw-checklist" id="pwChecklist">
+					<span class="pw-item" id="pwc-upper"><span class="pw-mark">✕</span> 영어대문자</span>
+					<span class="pw-item" id="pwc-lower"><span class="pw-mark">✕</span> 영어소문자</span>
+					<span class="pw-item" id="pwc-num"><span class="pw-mark">✕</span> 숫자</span>
+					<span class="pw-item" id="pwc-special"><span class="pw-mark">✕</span> 특수문자</span>
+					<span class="pw-item" id="pwc-len"><span class="pw-mark">✕</span> 10~15자</span>
+				</div>
+			</div>
+			<div class="field">
+				<label>비밀번호 확인</label>
+				<input type="password" id="rPw2" autocomplete="new-password" placeholder="비밀번호 재입력"
+				       oninput="validatePw2()">
+				<div class="pw-checklist" id="pw2Status">
+					<span class="pw-item" id="pw2-item">
+						<span class="pw-mark">✕</span>
+						<span id="pw2-text">일치하지 않음</span>
+					</span>
+				</div>
+			</div>
+			<div class="field">
+				<label>이름 <span style="font-weight:400;color:#9ca3af">(한글 또는 영문 2~50자)</span></label>
+				<input type="text" id="rName" autocomplete="name" placeholder="실명 입력"
+				       oninput="validateName()">
+				<div class="msg" id="rNameMsg"></div>
+			</div>
+
+			<!-- 소셜 본인확인 -->
+			<div class="field">
+				<label>소셜 본인확인 <span style="font-weight:400;color:#9ca3af">(선택 사항)</span></label>
+				<div class="social-btns" style="justify-content:flex-start;">
+					<button type="button" class="s-btn google" style="flex:none;padding:8px 14px;" onclick="socialVerify('google')">
+						구글 인증
+					</button>
+					<button type="button" class="s-btn kakao" style="flex:none;padding:8px 14px;" onclick="socialVerify('kakao')">
+						카카오 인증
+					</button>
+					<button type="button" class="s-btn naver" style="flex:none;padding:8px 14px;" onclick="socialVerify('naver')">
+						네이버 인증
+					</button>
+				</div>
+				<div class="social-verified" id="verifiedBadge">
+					<span>✓</span>
+					<span id="verifiedText"></span>
+				</div>
+			</div>
+
+			<div class="msg err" id="rErr" style="margin-bottom:8px;"></div>
+			<button class="btn-main" id="regBtn" onclick="doRegister()">회원가입 신청</button>
+		</div>
+	</div>
+</div>
+
+<script>
+// ── 이미 로그인된 경우 메인으로 이동 ──
+fetch('/api/auth/me').then(r => {
+	if (r.ok) location.replace('/');
+});
+
+// ── URL 파라미터 처리 (pending=1 이면 승인 대기 안내) ──
+if (new URLSearchParams(location.search).get('pending') === '1') {
+	document.getElementById('pendingBox').classList.add('show');
+}
+
+// ── 탭 전환 ──
+function switchTab(tab) {
+	document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+	document.getElementById('tabReg').classList.toggle('active', tab === 'reg');
+	document.getElementById('secLogin').classList.toggle('active', tab === 'login');
+	document.getElementById('secReg').classList.toggle('active', tab === 'reg');
+}
+
+// ── 유효성 검사 ──
+const VALID_ID   = /^[a-z0-9!@#$%^&*._\-]{6,20}$/;
+const VALID_NAME = /^[가-힣a-zA-Z]{2,50}$/;
+function validPw(pw) {
+	if (!pw || pw.length < 10 || pw.length > 15) return false;
+	return /[a-z]/.test(pw) && /[A-Z]/.test(pw) && /[0-9]/.test(pw) && /[!@#$%^&*()\-_=+[\]{};:,.<>?]/.test(pw);
+}
+
+function setMsg(id, text, ok) {
+	const el = document.getElementById(id);
+	el.textContent = text;
+	el.className   = 'msg ' + (ok ? 'ok' : 'err');
+	const input = document.getElementById(id.replace('Msg', '').replace('r', 'r'));
+	const fieldInput = document.querySelector(`#${id}`).previousElementSibling;
+	if (fieldInput && fieldInput.tagName === 'INPUT') {
+		fieldInput.classList.toggle('err', !ok && text.length > 0);
+	}
+}
+
+let idOk=false, pwOk=false, pw2Ok=false, nameOk=false;
+
+function validateId() {
+	const v = document.getElementById('rId').value;
+	if (!v) { setMsg('rIdMsg','',true); idOk=false; return; }
+	idOk = VALID_ID.test(v);
+	setMsg('rIdMsg', idOk ? '사용 가능한 형식입니다.' : '영어소문자·숫자·특수문자(!@#$%^&*._-)만, 6~20자', idOk);
+	document.getElementById('rId').classList.toggle('err', !idOk);
+}
+function validatePw() {
+	const v  = document.getElementById('rPw').value;
+	const checks = {
+		upper:   /[A-Z]/.test(v),
+		lower:   /[a-z]/.test(v),
+		num:     /[0-9]/.test(v),
+		special: /[!@#$%^&*()\-_=+[\]{};:,.<>?]/.test(v),
+		len:     v.length >= 10 && v.length <= 15,
+	};
+	Object.entries(checks).forEach(([key, ok]) => {
+		const el   = document.getElementById('pwc-' + key);
+		const mark = el.querySelector('.pw-mark');
+		el.classList.toggle('ok', ok);
+		mark.textContent = ok ? 'O' : '✕';
+	});
+	pwOk = Object.values(checks).every(Boolean);
+	document.getElementById('rPw').classList.toggle('err', v.length > 0 && !pwOk);
+	if (document.getElementById('rPw2').value) validatePw2();
+}
+function validatePw2() {
+	const v   = document.getElementById('rPw2').value;
+	const pw  = document.getElementById('rPw').value;
+	const box = document.getElementById('pw2Status');
+	const item = document.getElementById('pw2-item');
+	const mark = item.querySelector('.pw-mark');
+	const text = document.getElementById('pw2-text');
+
+	if (!v) {
+		pw2Ok = false;
+		item.classList.remove('ok');
+		mark.textContent = '✕';
+		text.textContent = '일치하지 않음';
+		document.getElementById('rPw2').classList.remove('err');
+		return;
+	}
+	pw2Ok = (v === pw);
+	item.classList.toggle('ok', pw2Ok);
+	mark.textContent = pw2Ok ? 'O' : '✕';
+	text.textContent = pw2Ok ? '비밀번호가 동일합니다.' : '일치하지 않음';
+	document.getElementById('rPw2').classList.toggle('err', !pw2Ok);
+}
+function validateName() {
+	const v = document.getElementById('rName').value;
+	if (!v) { setMsg('rNameMsg','',true); nameOk=false; return; }
+	nameOk = VALID_NAME.test(v);
+	setMsg('rNameMsg', nameOk ? '올바른 이름입니다.' : '한글 또는 영문만, 2~50자', nameOk);
+	document.getElementById('rName').classList.toggle('err', !nameOk);
+}
+
+// ── 소셜 본인확인 (팝업) ──
+let socialData = null;
+
+function socialVerify(provider) {
+	const url = `/api/auth/${provider}/start?mode=verify`;
+	const popup = window.open(url, 'socialVerify', 'width=520,height=640,top=100,left=100');
+	const handler = e => {
+		if (e.source !== popup) return;
+		if (e.data && e.data.type === 'socialVerified' && e.data.success) {
+			socialData = { provider: e.data.provider, key: e.data.key };
+			document.getElementById('verifiedText').textContent =
+				`${e.data.provider === 'google' ? '구글' : e.data.provider === 'kakao' ? '카카오' : '네이버'} 계정 인증 완료 (${e.data.name || ''})`;
+			document.getElementById('verifiedBadge').classList.add('show');
+		} else if (e.data && !e.data.success) {
+			alert(e.data.error || '인증에 실패했습니다.');
+		}
+		window.removeEventListener('message', handler);
+	};
+	window.addEventListener('message', handler);
+}
+
+// ── 소셜 로그인 (팝업) ──
+function socialLogin(provider) {
+	const url = `/api/auth/${provider}/start?mode=login`;
+	const popup = window.open(url, 'socialLogin', 'width=520,height=640,top=100,left=100');
+	const handler = e => {
+		if (e.source !== popup) return;
+		if (e.data && e.data.type === 'socialLogin' && e.data.success) {
+			location.href = '/';
+		} else if (e.data && !e.data.success) {
+			document.getElementById('lErr').textContent = e.data.error || '소셜 로그인 실패';
+		}
+		window.removeEventListener('message', handler);
+	};
+	window.addEventListener('message', handler);
+}
+
+// ── 일반 로그인 ──
+async function doLogin() {
+	const id  = document.getElementById('lId').value.trim();
+	const pw  = document.getElementById('lPw').value;
+	const err = document.getElementById('lErr');
+	err.textContent = '';
+	if (!id || !pw) { err.textContent = '아이디와 비밀번호를 입력하세요.'; return; }
+
+	const btn = document.getElementById('loginBtn');
+	btn.disabled = true; btn.textContent = '로그인 중...';
+	try {
+		const r = await fetch('/api/auth/login', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ userId: id, userPw: pw }),
+		});
+		const data = await r.json();
+		if (r.ok) {
+			location.href = '/';
+		} else if (data.pending) {
+			document.getElementById('pendingBox').classList.add('show');
+			err.textContent = '';
+		} else {
+			err.textContent = data.error || '로그인 실패';
+		}
+	} catch(e) {
+		err.textContent = '서버 오류가 발생했습니다.';
+	} finally {
+		btn.disabled = false; btn.textContent = '로그인';
+	}
+}
+
+// ── Enter 키 로그인 ──
+['lId','lPw'].forEach(id => {
+	document.getElementById(id).addEventListener('keydown', e => {
+		if (e.key === 'Enter') doLogin();
+	});
+});
+
+// ── 회원가입 ──
+async function doRegister() {
+	validateId(); validatePw(); validatePw2(); validateName();
+	if (!idOk)   { document.getElementById('rId').focus();   return; }
+	if (!pwOk)   { document.getElementById('rPw').focus();   return; }
+	if (!pw2Ok)  { document.getElementById('rPw2').focus();  return; }
+	if (!nameOk) { document.getElementById('rName').focus(); return; }
+
+	const payload = {
+		userId:   document.getElementById('rId').value.trim(),
+		userPw:   document.getElementById('rPw').value,
+		userName: document.getElementById('rName').value.trim(),
+		socialProvider: socialData?.provider || null,
+		socialKey:      socialData?.key      || null,
+	};
+
+	const btn = document.getElementById('regBtn');
+	btn.disabled = true; btn.textContent = '신청 중...';
+	const errEl = document.getElementById('rErr');
+	errEl.textContent = '';
+	try {
+		const r = await fetch('/api/auth/register', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(payload),
+		});
+		const data = await r.json();
+		if (r.ok) {
+			document.getElementById('regForm').style.display = 'none';
+			document.getElementById('regSuccess').style.display = 'block';
+		} else {
+			errEl.textContent = data.error || '회원가입 실패';
+		}
+	} catch(e) {
+		errEl.textContent = '서버 오류가 발생했습니다.';
+	} finally {
+		btn.disabled = false; btn.textContent = '회원가입 신청';
+	}
+}
+</script>
+</body>
+</html>
