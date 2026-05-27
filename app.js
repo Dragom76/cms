@@ -144,6 +144,7 @@ const ROLES = {
   PENDING: '미승인',
 };
 const MGMT_ROLES = ['ADMIN', 'CM', 'SA'];
+const PROJECT_CREATE_ROLES = ['ADMIN', 'PM', 'CM'];
 const PROJECT_DELETE_ROLES = ['ADMIN', 'PM'];
 
 // ════════════════════════════════════════════════════════════
@@ -516,7 +517,7 @@ app.get('/api/projects', requireAuth(), async (req, res) => {
   } catch(e) { console.error(e); res.status(500).json({ error: '조회 실패' }); }
 });
 
-app.post('/api/projects', requireAuth(['ADMIN']), async (req, res) => {
+app.post('/api/projects', requireAuth(PROJECT_CREATE_ROLES), async (req, res) => {
   const { projectName, projectCode, description } = req.body;
   if (!projectName?.trim()) return res.status(400).json({ error: '프로젝트명을 입력하세요.' });
   try {

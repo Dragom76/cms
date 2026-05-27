@@ -628,8 +628,13 @@ textarea.form-input{resize:vertical;min-height:120px;}
    인증 초기화
 ════════════════════════════════ */
 const MGMT_ROLES = ['ADMIN','CM','SA'];
+const PROJECT_CREATE_ROLES = ['ADMIN','PM','CM'];
 const PROJECT_DELETE_ROLES = ['ADMIN','PM'];
 let currentUser  = null;
+
+function canCreateProject() {
+  return currentUser && PROJECT_CREATE_ROLES.includes(currentUser.role);
+}
 
 function canDeleteProject() {
   return currentUser && PROJECT_DELETE_ROLES.includes(currentUser.role);
@@ -647,7 +652,7 @@ async function initAuth() {
       document.getElementById('mgmtBtn').style.display = '';
       checkPending();
     }
-    if (currentUser.role === 'ADMIN') {
+    if (canCreateProject()) {
       document.getElementById('newProjBtn').style.display = '';
     }
   } catch(e) { location.href = '/login'; }
