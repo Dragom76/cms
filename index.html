@@ -627,10 +627,15 @@ textarea.form-input{resize:vertical;min-height:120px;}
 /* ════════════════════════════════
    인증 초기화
 ════════════════════════════════ */
-const MGMT_ROLES = ['ADMIN','CM','SA'];
+const ADMIN_ROLES = ['ADMIN','PM','CM'];
+const MGMT_ROLES = ['ADMIN','PM','CM','SA'];
 const PROJECT_CREATE_ROLES = ['ADMIN','PM','CM'];
-const PROJECT_DELETE_ROLES = ['ADMIN','PM'];
+const PROJECT_DELETE_ROLES = ADMIN_ROLES;
 let currentUser  = null;
+
+function canAdmin() {
+  return currentUser && ADMIN_ROLES.includes(currentUser.role);
+}
 
 function canCreateProject() {
   return currentUser && PROJECT_CREATE_ROLES.includes(currentUser.role);
@@ -1084,7 +1089,7 @@ async function loadComments(postId) {
       const rightWrap = document.createElement('div');
       rightWrap.style.cssText = 'display:flex;align-items:center;gap:8px;';
       rightWrap.appendChild(dateSpan);
-      const canDelete = currentUser && (currentUser.role === 'ADMIN' || currentUser.id === c.AUTHOR_ID);
+      const canDelete = currentUser && (canAdmin() || currentUser.id === c.AUTHOR_ID);
       if (canDelete) {
         const delBtn = document.createElement('button');
         delBtn.className = 'btn btn-danger btn-sm';
@@ -1225,7 +1230,7 @@ async function openUserDetail(uid) {
       roleSelect.appendChild(opt);
     });
     document.getElementById('udStatusSelect').value = u.STATUS || 'PENDING';
-    const isAdmin = currentUser && currentUser.role === 'ADMIN';
+    const isAdmin = canAdmin();
     document.getElementById('udSaveBtn').style.display  = isAdmin ? '' : 'none';
     roleSelect.disabled = !isAdmin;
     document.getElementById('udStatusSelect').disabled = !isAdmin;
@@ -1246,7 +1251,7 @@ function closeUserDetail() {
 }
 
 async function togglePw() {
-  if (!currentUser || currentUser.role !== 'ADMIN') { alert('ADMIN만 확인 가능합니다.'); return; }
+  if (!canAdmin()) { alert('관리자 권한만 확인 가능합니다.'); return; }
   if (!pwRevealed) {
     try {
       const r = await fetch('/api/users/'+currentUid+'/pw');
@@ -1370,10 +1375,10 @@ async function loadDashboard() {
           </div>
         </div>`;
       card.onclick = () => enterProject(p.PROJECT_ID, p.PROJECT_NAME);
-      if (currentUser && (currentUser.role === 'ADMIN' || canDeleteProject())) {
+      if (canAdmin() || canDeleteProject()) {
         const ft = document.createElement('div');
         ft.className = 'proj-card-ft';
-        if (currentUser.role === 'ADMIN') {
+        if (canAdmin()) {
           const settingsBtn = document.createElement('button');
           settingsBtn.className = 'btn-proj-settings';
           settingsBtn.textContent = '설정';

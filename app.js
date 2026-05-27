@@ -143,9 +143,10 @@ const ROLES = {
   FM:      '작업반장(FM)',
   PENDING: '미승인',
 };
-const MGMT_ROLES = ['ADMIN', 'CM', 'SA'];
+const ADMIN_ROLES = ['ADMIN', 'PM', 'CM'];
+const MGMT_ROLES = ['ADMIN', 'PM', 'CM', 'SA'];
 const PROJECT_CREATE_ROLES = ['ADMIN', 'PM', 'CM'];
-const PROJECT_DELETE_ROLES = ['ADMIN', 'PM'];
+const PROJECT_DELETE_ROLES = ADMIN_ROLES;
 
 // ════════════════════════════════════════════════════════════
 //  인증 미들웨어
@@ -448,7 +449,7 @@ app.get('/api/users/:id', requireAuth(MGMT_ROLES), async (req, res) => {
   } catch(e) { res.status(500).json({ error: '조회 실패' }); }
 });
 
-app.get('/api/users/:id/pw', requireAuth(['ADMIN']), async (req, res) => {
+app.get('/api/users/:id/pw', requireAuth(ADMIN_ROLES), async (req, res) => {
   try {
     const r = await pool.query('SELECT user_pw_enc FROM tboard_users WHERE user_id=$1', [req.params.id]);
     if (!r.rows.length) return res.status(404).json({ error: '없음' });
@@ -456,7 +457,7 @@ app.get('/api/users/:id/pw', requireAuth(['ADMIN']), async (req, res) => {
   } catch(e) { res.status(500).json({ error: '복호화 실패' }); }
 });
 
-app.put('/api/users/:id', requireAuth(['ADMIN']), async (req, res) => {
+app.put('/api/users/:id', requireAuth(ADMIN_ROLES), async (req, res) => {
   const { role, status } = req.body;
   if (role   && !Object.keys(ROLES).includes(role))              return res.status(400).json({ error: '올바르지 않은 역할' });
   if (status && !['PENDING','ACTIVE','INACTIVE'].includes(status)) return res.status(400).json({ error: '올바르지 않은 상태' });
@@ -471,7 +472,7 @@ app.put('/api/users/:id', requireAuth(['ADMIN']), async (req, res) => {
 
 app.get('/api/roles', requireAuth(), (req, res) => res.json(ROLES));
 
-app.get('/api/users/:id/projects', requireAuth(['ADMIN']), async (req, res) => {
+app.get('/api/users/:id/projects', requireAuth(ADMIN_ROLES), async (req, res) => {
   try {
     const r = await pool.query(
       `SELECT p.project_id, p.project_name,
@@ -489,7 +490,7 @@ app.get('/api/users/:id/projects', requireAuth(['ADMIN']), async (req, res) => {
 //  프로젝트 API
 // ════════════════════════════════════════════════════════════
 app.get('/api/projects', requireAuth(), async (req, res) => {
-  const isAdmin = req.session.user.role === 'ADMIN';
+  const isAdmin = ADMIN_ROLES.includes(req.session.user.role);
   try {
     let r;
     if (isAdmin) {
@@ -529,7 +530,7 @@ app.post('/api/projects', requireAuth(PROJECT_CREATE_ROLES), async (req, res) =>
   } catch(e) { console.error(e); res.status(500).json({ error: '생성 실패' }); }
 });
 
-app.put('/api/projects/:id', requireAuth(['ADMIN']), async (req, res) => {
+app.put('/api/projects/:id', requireAuth(ADMIN_ROLES), async (req, res) => {
   const { projectName, description, status } = req.body;
   try {
     await pool.query(
@@ -545,22 +546,9 @@ app.put('/api/projects/:id', requireAuth(['ADMIN']), async (req, res) => {
 });
 
 app.delete('/api/projects/:id', requireAuth(PROJECT_DELETE_ROLES), async (req, res) => {
-  const u = req.session.user;
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-
-    if (u.role === 'PM') {
-      const allowed = await client.query(
-        `SELECT 1 FROM project_members
-         WHERE project_id=$1 AND user_id=$2`,
-        [req.params.id, u.id]
-      );
-      if (!allowed.rows.length) {
-        await client.query('ROLLBACK');
-        return res.status(403).json({ error: '권한 없음' });
-      }
-    }
 
     const result = await client.query(
       `UPDATE projects
@@ -598,7 +586,7 @@ app.get('/api/projects/:id/members', requireAuth(MGMT_ROLES), async (req, res) =
   } catch(e) { res.status(500).json({ error: '조회 실패' }); }
 });
 
-app.post('/api/projects/:id/members', requireAuth(['ADMIN']), async (req, res) => {
+app.post('/api/projects/:id/members', requireAuth(ADMIN_ROLES), async (req, res) => {
   try {
     await pool.query(
       'INSERT INTO project_members(project_id,user_id) VALUES($1,$2)',
@@ -611,7 +599,7 @@ app.post('/api/projects/:id/members', requireAuth(['ADMIN']), async (req, res) =
   }
 });
 
-app.delete('/api/projects/:id/members/:uid', requireAuth(['ADMIN']), async (req, res) => {
+app.delete('/api/projects/:id/members/:uid', requireAuth(ADMIN_ROLES), async (req, res) => {
   try {
     await pool.query(
       'DELETE FROM project_members WHERE project_id=$1 AND user_id=$2',
@@ -732,7 +720,7 @@ app.delete('/api/board/:postId/comments/:cid', requireAuth(), async (req, res) =
       [req.params.cid, req.params.postId]
     );
     if (!chk.rows.length) return res.status(404).json({ error: '없음' });
-    if (u.role !== 'ADMIN' && chk.rows[0].author_id !== u.id)
+    if (!ADMIN_ROLES.includes(u.role) && chk.rows[0].author_id !== u.id)
       return res.status(403).json({ error: '권한 없음' });
     await pool.query('DELETE FROM comments WHERE comment_id=$1', [req.params.cid]);
     res.json({ success: true });
